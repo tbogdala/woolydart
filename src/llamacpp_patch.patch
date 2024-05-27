@@ -1,0 +1,22 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index c09d834f..756cf1a1 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1246,6 +1246,17 @@ add_library(llama
+             unicode.h
+             unicode.cpp
+             unicode-data.cpp
++            ../bindings.cpp
++            ../bindings.h
++            common/build-info.cpp
++            common/common.cpp
++            common/common.h
++            common/grammar-parser.cpp
++            common/grammar-parser.h
++            common/json-schema-to-grammar.cpp
++            common/json-schema-to-grammar.h
++            common/sampling.cpp
++            common/sampling.h
+             )
+ 
+ target_include_directories(llama PUBLIC .)
