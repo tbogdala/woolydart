@@ -3,6 +3,7 @@ import 'package:ffi/ffi.dart';
 import 'package:format/format.dart';
 import 'package:woolydart/src/llama_cpp_bindings.dart';
 import 'package:test/test.dart';
+import 'dart:developer';
 
 void main() {
   group('Raw binding tests', () {
@@ -34,21 +35,21 @@ void main() {
     });
 
     var prompt =
-        "Write the start to the next movie collaboration between Quentin Tarantino and Robert Rodriguez.\n"
+        "<|user|>\nWrite the start to the next movie collaboration between Quentin Tarantino and Robert Rodriguez.<|end|>\n<|assistant|>\n"
             .toNativeUtf8();
     var seed = 42;
     var threads = 4;
     var tokens = 100;
-    var topK = 40;
+    var topK = 1;
     var topP = 1.0;
-    var minP = 0.08;
-    var temp = 1.1;
+    var minP = 0.1;
+    var temp = 0.1;
     var repeatPenalty = 1.1;
     var repeatLastN = 512;
     var ignoreEos = false;
     var nBatch = 128;
     var nKeep = 128;
-    var antiprompt = "".toNativeUtf8();
+    var antiprompt = "".toNativeUtf8() as Pointer<Pointer<Char>>;
     var antipromptCount = 0;
     var tfsZ = 1.0;
     var typicalP = 1.0;
@@ -70,6 +71,28 @@ void main() {
     var ropeFreqScale = 0.0;
     var grammar = "".toNativeUtf8();
 
+    final antipromptStrings = [
+      "<|end|>",
+    ];
+    if (antipromptStrings.isNotEmpty) {
+      log("Making antiprompt strings native...");
+
+      // allocate all the array of pointers.
+      final Pointer<Pointer<Char>> antiPointers =
+          calloc.allocate(antipromptStrings.length * sizeOf<Pointer<Char>>());
+
+      // allocate each of the native strings
+      for (int ai = 0; ai < antipromptStrings.length; ai++) {
+        log("Allocating antipromtp #$ai");
+        Pointer<Char> native =
+            antipromptStrings[ai].toNativeUtf8() as Pointer<Char>;
+        antiPointers[ai] = native;
+      }
+
+      antiprompt = antiPointers;
+      antipromptCount = antipromptStrings.length;
+    }
+
     var params = lib.wooly_allocate_params(
         prompt as Pointer<Char>,
         seed,
@@ -84,7 +107,7 @@ void main() {
         ignoreEos,
         nBatch,
         nKeep,
-        antiprompt as Pointer<Pointer<Char>>,
+        antiprompt,
         antipromptCount,
         tfsZ,
         typicalP,

@@ -159,6 +159,7 @@ wooly_predict_result wooly_predict(
     llama_sampling_params &sparams = params_p->sparams;
     llama_predict_prompt_cache *prompt_cache_data = (llama_predict_prompt_cache *) prompt_cache_ptr;
     wooly_predict_result return_value;
+    return_value.n_eval = return_value.n_p_eval = return_value.n_sample = 0;
     
     llama_set_n_threads(ctx, params_p->n_threads, params_p->n_threads_batch);
     llama_kv_cache_clear(ctx);
@@ -298,7 +299,7 @@ wooly_predict_result wooly_predict(
 
     if ((int) embd_inp.size() > n_ctx - 4) {
         LOG("%s: error: prompt is too long (%d tokens, max %d)\n", __func__, (int) embd_inp.size(), n_ctx - 4);
-        return_value.result = 1;
+        return_value.result = 2;
         return return_value;
     }
 
@@ -483,7 +484,7 @@ wooly_predict_result wooly_predict(
                     int n_eval = std::min(input_size - i, params_p->n_batch);
                     if (llama_decode(ctx_guidance, llama_batch_get_one(input_buf + i, n_eval, n_past_guidance, 0))) {
                         LOG("%s : failed to eval\n", __func__);
-                        return_value.result = 1;
+                        return_value.result = 3;
                         return return_value;
                     }
 
@@ -501,7 +502,11 @@ wooly_predict_result wooly_predict(
 
                 if (llama_decode(ctx, llama_batch_get_one(&embd[i], n_eval, n_past, 0))) {
                     LOG("%s : failed to eval\n", __func__);
-                    return_value.result = 1;
+                    return_value.result = 4;
+                    const llama_timings timings = llama_get_timings(ctx);
+                    return_value.n_sample = timings.n_sample;
+                    return_value.n_p_eval = timings.n_p_eval;
+                    return_value.n_eval = timings.n_eval;
                     return return_value;
                 }
 
