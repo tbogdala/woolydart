@@ -8,6 +8,11 @@
 #include <string>
 #include <vector>
 
+// internal functions headers
+void fill_gpt_params_from_simple(gpt_params_simple *simple, struct gpt_params *output);
+
+
+
 typedef struct llama_predict_prompt_cache {
     std::string last_prompt;
     std::vector<llama_token> processed_prompt_tokens;
@@ -60,50 +65,9 @@ static std::string llama_token_to_str(const struct llama_context * ctx, llama_to
 
 
 load_model_result wooly_load_model(
-    const char *fname, int n_ctx, int n_seed, bool mlock, bool mmap, bool embeddings, int n_gpu_layers, 
-    int n_batch, int maingpu, const char *tensorsplit, float rope_freq, float rope_scale)
+    const char *fname, struct llama_model_params model_params, struct llama_context_params context_params)
 {
-    // load the model
-    auto lparams = llama_context_default_params();
-    auto mparams = llama_model_default_params();
-
-    lparams.n_ctx = n_ctx;
-    lparams.n_batch = n_batch;
-    lparams.seed = n_seed;
-    lparams.embeddings = embeddings;
-    lparams.rope_freq_base = rope_freq;
-    lparams.rope_freq_scale = rope_scale;
-    mparams.use_mlock = mlock;
-    mparams.use_mmap = mmap;
-    mparams.n_gpu_layers = n_gpu_layers;
-    mparams.main_gpu = maingpu;
-
-    if (tensorsplit != NULL && strlen(tensorsplit) > 0)
-    {
-        std::string arg_next = tensorsplit;
-        // split string by , and /
-        const std::regex regex{R"([,/]+)"};
-        std::sregex_token_iterator it{arg_next.begin(), arg_next.end(), regex, -1};
-        std::vector<std::string> split_arg{it, {}};
-        auto max_devices = llama_max_devices();
-        GGML_ASSERT(split_arg.size() <= max_devices);
-
-	    float *tsplit = (float*)malloc(sizeof(float) * max_devices);
-
-        for (size_t i = 0; i < max_devices; ++i)
-        {
-            if (i < split_arg.size())
-            {
-                tsplit[i] = std::stof(split_arg[i]);
-            }
-            else
-            {
-                tsplit[i] = 0.0f;
-            }
-        }
-	    mparams.tensor_split = tsplit;
-    }
-
+    log_disable();
     llama_backend_init();
     llama_numa_init(GGML_NUMA_STRATEGY_DISABLED);
     
@@ -115,8 +79,8 @@ load_model_result wooly_load_model(
     // TODO: implement lora adapters (e.g. llama_init_from_gpt_params())
     try
     {
-        model = llama_load_model_from_file(fname, mparams);
-	    lctx = llama_new_context_with_model(model, lparams);
+        model = llama_load_model_from_file(fname, model_params);
+	    lctx = llama_new_context_with_model(model, context_params);
     }
     catch (std::runtime_error &e)
     {
@@ -130,7 +94,7 @@ load_model_result wooly_load_model(
         LOG("warming up the model with an empty run\n");
 
         std::vector<llama_token> tmp = { llama_token_bos(model), llama_token_eos(model), };
-        llama_decode(lctx, llama_batch_get_one(tmp.data(), std::min(tmp.size(), (size_t) n_batch), 0, 0));
+        llama_decode(lctx, llama_batch_get_one(tmp.data(), std::min(tmp.size(), (size_t) context_params.n_batch), 0, 0));
         llama_kv_cache_clear(lctx);
         llama_reset_timings(lctx);
     }
@@ -140,28 +104,30 @@ load_model_result wooly_load_model(
     return res;
 }
 
-void wooly_free_model(void *ctx_ptr, void *model_ptr)
+void wooly_free_model(llama_context *ctx, llama_model *model)
 {
-    llama_context *ctx = (llama_context *)ctx_ptr;
-    llama_model *model = (llama_model *)model_ptr;
-    llama_free_model(model);
-    llama_free(ctx);
+    if (model != NULL) {
+        llama_free_model(model);
+    }
+    if (ctx != NULL) {
+        llama_free(ctx);
+    }
 }
 
 wooly_predict_result wooly_predict(
-    void *params_ptr, void *ctx_ptr, void *model_ptr, bool include_specials, char *out_result, 
+    gpt_params_simple simple_params, struct llama_context *ctx, struct llama_model *model, bool include_specials, char *out_result, 
     void* prompt_cache_ptr) 
 {
-    llama_context *ctx = (llama_context *)ctx_ptr;
-    llama_model *model = (llama_model *)model_ptr;
     llama_context *ctx_guidance = nullptr;
-    gpt_params *params_p = (gpt_params *)params_ptr;
-    llama_sampling_params &sparams = params_p->sparams;
+    gpt_params params;
+    fill_gpt_params_from_simple(&simple_params, &params);
+    
+    llama_sampling_params &sparams = params.sparams;
     llama_predict_prompt_cache *prompt_cache_data = (llama_predict_prompt_cache *) prompt_cache_ptr;
     wooly_predict_result return_value;
     return_value.n_eval = return_value.n_p_eval = return_value.n_sample = 0;
     
-    llama_set_n_threads(ctx, params_p->n_threads, params_p->n_threads_batch);
+    llama_set_n_threads(ctx, params.n_threads, params.n_threads_batch);
     llama_kv_cache_clear(ctx);
     llama_reset_timings(ctx);
         
@@ -171,31 +137,31 @@ wooly_predict_result wooly_predict(
         // LOG("%s: build = %d (%s)\n",      __func__, LLAMA_BUILD_NUMBER, LLAMA_COMMIT);
         // LOG("%s: built with %s for %s\n", __func__, LLAMA_COMPILER, LLAMA_BUILD_TARGET);
         LOG("\n");
-        LOG("%s\n", gpt_params_get_system_info(*params_p).c_str());
+        LOG("%s\n", gpt_params_get_system_info(params).c_str());
     }
 
-    if (params_p->ignore_eos) {
+    if (params.ignore_eos) {
         LOG("%s: Ignoring EOS token by setting bias to -INFINITY\n", __func__);
         sparams.logit_bias[llama_token_eos(model)] = -INFINITY;
     }
 
-    if (params_p->rope_freq_base != 0.0) {
-        LOG("%s: warning: changing RoPE frequency base to %g.\n", __func__, params_p->rope_freq_base);
+    if (params.rope_freq_base != 0.0) {
+        LOG("%s: warning: changing RoPE frequency base to %g.\n", __func__, params.rope_freq_base);
     }
 
-    if (params_p->rope_freq_scale != 0.0) {
-        LOG("%s: warning: scaling RoPE frequency by %g.\n", __func__, params_p->rope_freq_scale);
+    if (params.rope_freq_scale != 0.0) {
+        LOG("%s: warning: scaling RoPE frequency by %g.\n", __func__, params.rope_freq_scale);
     }
 
     if (sparams.cfg_scale > 1.f) {
-        struct llama_context_params lparams = llama_context_params_from_gpt_params(*params_p);
+        struct llama_context_params lparams = llama_context_params_from_gpt_params(params);
         ctx_guidance = llama_new_context_with_model(model, lparams);
     }
 
     const int n_ctx_train = llama_n_ctx_train(model);
     const int n_ctx = llama_n_ctx(ctx);
 
-    LOG("%s: input: %s\n", __func__, params_p->prompt.c_str());
+    LOG("%s: input: %s\n", __func__, params.prompt.c_str());
 
     if (n_ctx > n_ctx_train) {
         LOG("%s: warning: model was trained on only %d context tokens (%d specified)\n",
@@ -203,10 +169,10 @@ wooly_predict_result wooly_predict(
     }
 
     bool resuse_last_prompt_data = false;
-    if (prompt_cache_data != nullptr && params_p->prompt_cache_all) {
+    if (prompt_cache_data != nullptr && params.prompt_cache_all) {
         // check to see if we're repeating the same prompt and reuse the stored prompt data if so.
         // if it's not a match, clear out the cached tokens.
-        if (prompt_cache_data->last_prompt == params_p->prompt) {
+        if (prompt_cache_data->last_prompt == params.prompt) {
             LOG("Prompt match detected. Going to attempt to use last processed prompt token data and state.\n");
             resuse_last_prompt_data = true;
             llama_set_state_data(ctx, prompt_cache_data->last_processed_prompt_state);
@@ -226,12 +192,12 @@ wooly_predict_result wooly_predict(
     // also copy the pointer of the prompt_cache_data to the result here now that it's for sure allocated
     return_value.prompt_cache = prompt_cache_data;
 
-    if (params_p->seed <= 0) {
-        params_p->seed = time(NULL);
-        LOG("%s: Seed == 0 so a new one was generated: %d\n", __func__, params_p->seed);    
+    if (params.seed <= 0) {
+        params.seed = time(NULL);
+        LOG("%s: Seed == 0 so a new one was generated: %d\n", __func__, params.seed);    
     }
 
-    std::string path_session = params_p->path_prompt_cache;
+    std::string path_session = params.path_prompt_cache;
     std::vector<llama_token> session_tokens;
 
     if (!path_session.empty()) {
@@ -260,16 +226,16 @@ wooly_predict_result wooly_predict(
 
     std::vector<llama_token> embd_inp;
     if (!resuse_last_prompt_data) {
-        if (!params_p->prompt.empty() || session_tokens.empty()) {
+        if (!params.prompt.empty() || session_tokens.empty()) {
             LOG("tokenize the prompt\n");
-            embd_inp = ::llama_tokenize(ctx, params_p->prompt, add_bos, true);
+            embd_inp = ::llama_tokenize(ctx, params.prompt, add_bos, true);
         } else {
             LOG("use session tokens\n");
             embd_inp = session_tokens;
         }
     }
 
-    LOG("prompt: \"%s\"\n", log_tostr(params_p->prompt));
+    LOG("prompt: \"%s\"\n", log_tostr(params.prompt));
     LOG("tokens: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx, embd_inp).c_str());
 
     // Should not run without any tokens
@@ -288,7 +254,7 @@ wooly_predict_result wooly_predict(
         guidance_inp = ::llama_tokenize(ctx_guidance, sparams.cfg_negative_prompt, true, true);
         LOG("guidance_inp tokenized: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx_guidance, guidance_inp).c_str());
 
-        std::vector<llama_token> original_inp = ::llama_tokenize(ctx, params_p->prompt, true, true);
+        std::vector<llama_token> original_inp = ::llama_tokenize(ctx, params.prompt, true, true);
         LOG("original_inp tokenized: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx, original_inp).c_str());
 
         original_prompt_len = original_inp.size();
@@ -312,7 +278,7 @@ wooly_predict_result wooly_predict(
             }
             n_matching_session_tokens++;
         }
-        if (params_p->prompt.empty() && n_matching_session_tokens == embd_inp.size()) {
+        if (params.prompt.empty() && n_matching_session_tokens == embd_inp.size()) {
             LOG("%s: using full prompt from session file\n", __func__);
         }
         else if (n_matching_session_tokens >= embd_inp.size()) {
@@ -343,15 +309,15 @@ wooly_predict_result wooly_predict(
     }
 
     // number of tokens to keep when resetting context
-    if (params_p->n_keep < 0 || params_p->n_keep > (int)embd_inp.size()) {
-        params_p->n_keep = (int)embd_inp.size();
+    if (params.n_keep < 0 || params.n_keep > (int)embd_inp.size()) {
+        params.n_keep = (int)embd_inp.size();
     } else {
-        params_p->n_keep += add_bos; // always keep the BOS token
+        params.n_keep += add_bos; // always keep the BOS token
     }
 
     {
         LOG("\n");
-        LOG("%s: prompt: '%s'\n", __func__, params_p->prompt.c_str());
+        LOG("%s: prompt: '%s'\n", __func__, params.prompt.c_str());
         LOG("%s: number of tokens in prompt = %zu\n", __func__, embd_inp.size());
         for (int i = 0; i < (int) embd_inp.size(); i++) {
             LOG("%6d -> '%s'\n", embd_inp[i], llama_token_to_piece(ctx, embd_inp[i]).c_str());
@@ -366,9 +332,9 @@ wooly_predict_result wooly_predict(
             }
         }
 
-       if (params_p->n_keep > add_bos) {
+       if (params.n_keep > add_bos) {
             LOG("%s: static prompt based on n_keep: '", __func__);
-            for (int i = 0; i < params_p->n_keep; i++) {
+            for (int i = 0; i < params.n_keep; i++) {
                 LOG("%s", llama_token_to_piece(ctx, embd_inp[i]).c_str());
             }
             LOG("'\n");
@@ -377,7 +343,7 @@ wooly_predict_result wooly_predict(
     }
     LOG("sampling: \n%s\n", llama_sampling_print(sparams).c_str());
     LOG("sampling order: \n%s\n", llama_sampling_order_print(sparams).c_str());
-    LOG("generate: n_ctx = %d, n_batch = %d, n_predict = %d, n_keep = %d\n", n_ctx, params_p->n_batch, params_p->n_predict, params_p->n_keep);
+    LOG("generate: n_ctx = %d, n_batch = %d, n_predict = %d, n_keep = %d\n", n_ctx, params.n_batch, params.n_predict, params.n_keep);
 
     LOG("\n\n");
 
@@ -385,7 +351,7 @@ wooly_predict_result wooly_predict(
     bool need_to_save_session = !path_session.empty() && n_matching_session_tokens < embd_inp.size();
 
     int n_past             = 0;
-    int n_remain           = params_p->n_predict;
+    int n_remain           = params.n_predict;
     int n_consumed         = 0;
     int n_session_consumed = 0;
     int n_past_guidance    = 0;
@@ -396,8 +362,8 @@ wooly_predict_result wooly_predict(
     // tokenized antiprompts
     std::vector<std::vector<llama_token>> antiprompt_ids;
 
-    antiprompt_ids.reserve(params_p->antiprompt.size());
-    for (const std::string & antiprompt : params_p->antiprompt) {
+    antiprompt_ids.reserve(params.antiprompt.size());
+    for (const std::string & antiprompt : params.antiprompt) {
         antiprompt_ids.emplace_back(::llama_tokenize(ctx, antiprompt, false, true));
     }
 
@@ -480,8 +446,8 @@ wooly_predict_result wooly_predict(
                     input_size = embd.size();
                 }
 
-                for (int i = 0; i < input_size; i += params_p->n_batch) {
-                    int n_eval = std::min(input_size - i, params_p->n_batch);
+                for (int i = 0; i < input_size; i += params.n_batch) {
+                    int n_eval = std::min(input_size - i, params.n_batch);
                     if (llama_decode(ctx_guidance, llama_batch_get_one(input_buf + i, n_eval, n_past_guidance, 0))) {
                         LOG("%s : failed to eval\n", __func__);
                         return_value.result = 3;
@@ -492,10 +458,10 @@ wooly_predict_result wooly_predict(
                 }
             }
 
-            for (int i = 0; i < (int)embd.size(); i += params_p->n_batch) {
+            for (int i = 0; i < (int)embd.size(); i += params.n_batch) {
                 int n_eval = (int)embd.size() - i;
-                if (n_eval > params_p->n_batch) {
-                    n_eval = params_p->n_batch;
+                if (n_eval > params.n_batch) {
+                    n_eval = params.n_batch;
                 }
 
                 LOG("eval: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx, embd).c_str());
@@ -530,13 +496,13 @@ wooly_predict_result wooly_predict(
                 need_to_save_session = false;
 
                 // optionally save the session on first sample (for faster prompt loading next time)
-                if (!path_session.empty() && need_to_save_session && !params_p->prompt_cache_ro) {
+                if (!path_session.empty() && need_to_save_session && !params.prompt_cache_ro) {
                     llama_state_save_file(ctx, path_session.c_str(), session_tokens.data(), session_tokens.size());
                     LOG("saved session to %s\n", path_session.c_str());
                 }
             } 
 
-            if (params_p->prompt_cache_all == true && need_to_save_state == true && resuse_last_prompt_data == false) {
+            if (params.prompt_cache_all == true && need_to_save_state == true && resuse_last_prompt_data == false) {
                 LOG("saving last used prompt data.\n");
                 need_to_save_state = false;
                 if (prompt_cache_data->last_processed_prompt_state != nullptr) {
@@ -545,7 +511,7 @@ wooly_predict_result wooly_predict(
                 const size_t state_size = llama_get_state_size(ctx);
                 prompt_cache_data->last_processed_prompt_state = new uint8_t[state_size];
                 llama_copy_state_data(ctx, prompt_cache_data->last_processed_prompt_state);
-                prompt_cache_data->last_prompt = params_p->prompt;
+                prompt_cache_data->last_prompt = params.prompt;
                 LOG("Adding to the processed_prompt_tokens vector %d tokens from embd_inp.\n", (int)embd_inp.size());
                 prompt_cache_data->processed_prompt_tokens.insert(prompt_cache_data->processed_prompt_tokens.end(), embd_inp.begin(),embd_inp.end());
             }
@@ -584,7 +550,7 @@ wooly_predict_result wooly_predict(
                 llama_sampling_accept(ctx_sampling, ctx, embd_inp[n_consumed], false);
 
                 ++n_consumed;
-                if ((int) embd.size() >= params_p->n_batch) {
+                if ((int) embd.size() >= params.n_batch) {
                     break;
                 }
             }
@@ -593,7 +559,7 @@ wooly_predict_result wooly_predict(
         // if not currently processing queued inputs;
         if ((int) embd_inp.size() <= n_consumed) {
             // check for reverse prompt in the last n_prev tokens
-            if (!params_p->antiprompt.empty()) {
+            if (!params.antiprompt.empty()) {
                 const int n_prev = 32;
                 const std::string last_output = llama_sampling_prev_str(ctx_sampling, ctx, n_prev);
 
@@ -601,7 +567,7 @@ wooly_predict_result wooly_predict(
                 // Check if each of the reverse prompts appears at the end of the output.
                 // If we're not running interactively, the reverse prompt might be tokenized with some following characters
                 // so we'll compensate for that by widening the search window a bit.
-                for (std::string & antiprompt : params_p->antiprompt) {
+                for (std::string & antiprompt : params.antiprompt) {
                     size_t extra_padding = 2;
                     size_t search_start_pos = last_output.length() > static_cast<size_t>(antiprompt.length() + extra_padding)
                         ? last_output.length() - static_cast<size_t>(antiprompt.length() + extra_padding)
@@ -635,7 +601,7 @@ wooly_predict_result wooly_predict(
         }
     }
 
-    if (!path_session.empty() && !params_p->prompt_cache_ro) {
+    if (!path_session.empty() && !params.prompt_cache_ro) {
         LOG("\n%s: saving final output to session file '%s'\n", __func__, path_session.c_str());
         llama_state_save_file(ctx, path_session.c_str(), session_tokens.data(), session_tokens.size());
     }
@@ -672,90 +638,110 @@ void wooly_free_prompt_cache(void *prompt_cache_ptr)
     }
 }
 
-void wooly_free_params(void *params_ptr)
+
+LLAMA_API gpt_params_simple wooly_new_params()
 {
-    gpt_params *params = (gpt_params *)params_ptr;
-    delete params;
+    gpt_params_simple output;
+    gpt_params prototype;
+
+    // copy default values from the prototype onto the output structure
+
+    output.prompt = nullptr;
+    output.antiprompts = nullptr;
+    output.antiprompt_count = 0;
+    output.seed = prototype.seed;
+    output.n_threads = prototype.n_threads;
+    output.n_threads_batch = prototype.n_threads_batch;
+    output.n_predict = prototype.n_predict;
+    output.n_ctx = prototype.n_ctx;
+    output.n_batch = prototype.n_batch;
+    output.n_gpu_layers = prototype.n_gpu_layers;
+    output.split_mode = prototype.split_mode;
+    output.main_gpu = prototype.main_gpu;
+    memcpy(&output.tensor_split, &prototype.tensor_split, sizeof(float) * 128);
+    output.grp_attn_n = prototype.grp_attn_n;
+    output.grp_attn_w = prototype.grp_attn_w;
+    output.rope_freq_base = prototype.rope_freq_base;
+    output.rope_freq_scale = prototype.rope_freq_scale;
+    output.yarn_ext_factor = prototype.yarn_ext_factor;
+    output.yarn_attn_factor = prototype.yarn_attn_factor;
+    output.yarn_beta_fast = prototype.yarn_beta_fast;
+    output.yarn_beta_slow = prototype.yarn_beta_slow;
+    output.yarn_orig_ctx = prototype.yarn_orig_ctx;
+    output.rope_scaling_type = prototype.rope_scaling_type;
+    output.prompt_cache_all = prototype.prompt_cache_all;
+    output.ignore_eos = prototype.ignore_eos;
+    output.flash_attn = prototype.flash_attn;
+
+    output.top_k = prototype.sparams.top_k;
+    output.top_p = prototype.sparams.top_p;
+    output.min_p = prototype.sparams.min_p;
+    output.tfs_z = prototype.sparams.tfs_z;
+    output.typical_p = prototype.sparams.typical_p;
+    output.temp = prototype.sparams.temp;
+    output.dynatemp_range = prototype.sparams.dynatemp_range;
+    output.dynatemp_exponent = prototype.sparams.dynatemp_exponent;
+    output.penalty_last_n = prototype.sparams.penalty_last_n;
+    output.penalty_repeat = prototype.sparams.penalty_repeat;
+    output.penalty_freq = prototype.sparams.penalty_freq;
+    output.penalty_present = prototype.sparams.penalty_present;
+    output.mirostat = prototype.sparams.mirostat;
+    output.mirostat_tau = prototype.sparams.mirostat_tau;
+    output.mirostat_eta = prototype.sparams.mirostat_eta;
+    output.penalize_nl = prototype.sparams.penalize_nl;
+   
+    return output;
 }
 
-void *wooly_allocate_params(
-    const char *prompt, int seed, int threads, int tokens, int top_k, float top_p, float min_p, 
-    float temp, float repeat_penalty, int repeat_last_n, bool ignore_eos, int n_batch, int n_keep, 
-    const char **antiprompt, int antiprompt_count, float tfs_z, float typical_p, float frequency_penalty, 
-    float presence_penalty, int mirostat, float mirostat_eta, float mirostat_tau, bool penalize_nl, 
-    const char *logit_bias, const char *session_file, bool prompt_cache_in_memory, bool mlock, bool mmap, 
-    int maingpu, const char *tensorsplit, bool file_prompt_cache_ro, float rope_freq_base, 
-    float rope_freq_scale, const char *grammar)
+void fill_gpt_params_from_simple(gpt_params_simple *simple, gpt_params *output)
 {
-    gpt_params *params = new gpt_params;
-    params->seed = seed;
-    params->n_threads = threads;
-    params->n_threads_batch = threads;
-    params->n_predict = tokens;
-    params->sparams.penalty_last_n = repeat_last_n;
-    params->sparams.top_k = top_k;
-    params->sparams.top_p = top_p;
-    params->sparams.min_p = min_p;
-    params->sparams.temp = temp;
-    params->use_mmap = mmap;
-    params->use_mlock = mlock;
-    params->sparams.penalty_repeat = repeat_penalty;
-    params->n_batch = n_batch;
-    params->n_keep = n_keep;
-    params->rope_freq_base = rope_freq_base;
-    params->rope_freq_scale = rope_freq_scale;
-    params->ignore_eos = ignore_eos;
-    params->main_gpu = maingpu;
-
-    if (tensorsplit[0] != '\0')
+    output->prompt = simple->prompt;
+    if (simple->antiprompt_count > 0)
     {
-        std::string arg_next = tensorsplit;
-        // split string by , and /
-        const std::regex regex{R"([,/]+)"};
-        std::sregex_token_iterator it{arg_next.begin(), arg_next.end(), regex, -1};
-        std::vector<std::string> split_arg{it, {}};
-        auto max_devices = llama_max_devices();
-        GGML_ASSERT(split_arg.size() <= max_devices);
-
-        for (size_t i = 0; i < max_devices; ++i)
-        {
-            if (i < split_arg.size())
-            {
-                params->tensor_split[i] = std::stof(split_arg[i]);
-            }
-            else
-            {
-                params->tensor_split[i] = 0.0f;
-            }
-        }
+        output->antiprompt = create_vector(simple->antiprompts, simple->antiprompt_count);
     }
 
-    params->prompt_cache_all = prompt_cache_in_memory;
-    params->path_prompt_cache = session_file;
-    params->prompt_cache_ro = file_prompt_cache_ro;
+    output->seed = simple->seed;
+    output->sparams.seed = simple->seed;
+    output->n_threads = simple->n_threads;
+    output->n_threads_batch = simple->n_threads_batch > 0 ? simple->n_threads_batch : simple->n_threads;
+    output->n_predict = simple->n_predict;
+    output->n_ctx = simple->n_ctx;
+    output->n_batch = simple->n_batch;
+    output->n_gpu_layers = simple->n_gpu_layers;
+    output->split_mode = (llama_split_mode) simple->split_mode;
+    output->main_gpu = simple->main_gpu;
+    memcpy(&output->tensor_split, &simple->tensor_split, sizeof(float) * 128);
+    output->grp_attn_n = simple->grp_attn_n;
+    output->grp_attn_w = simple->grp_attn_w;
+    output->rope_freq_base = simple->rope_freq_base;
+    output->rope_freq_scale = simple->rope_freq_scale;
+    output->yarn_ext_factor = simple->yarn_ext_factor;
+    output->yarn_attn_factor = simple->yarn_attn_factor;
+    output->yarn_beta_fast = simple->yarn_beta_fast;
+    output->yarn_beta_slow = simple->yarn_beta_slow;
+    output->yarn_orig_ctx = simple->yarn_orig_ctx;
+    output->rope_scaling_type = (llama_rope_scaling_type) simple->rope_scaling_type;
+    output->prompt_cache_all = simple->prompt_cache_all;
+    output->ignore_eos = simple->ignore_eos;
+    output->flash_attn = simple->flash_attn;
 
-    if (antiprompt_count > 0)
-    {
-        params->antiprompt = create_vector(antiprompt, antiprompt_count);
-    }
-    params->sparams.tfs_z = tfs_z;
-    params->sparams.typical_p = typical_p;
-    params->sparams.penalty_present = presence_penalty;
-    params->sparams.mirostat = mirostat;
-    params->sparams.mirostat_eta = mirostat_eta;
-    params->sparams.mirostat_tau = mirostat_tau;
-    params->sparams.penalize_nl = penalize_nl;
-    params->sparams.grammar = grammar;
-    std::stringstream ss(logit_bias);
-    llama_token key;
-    char sign;
-    std::string value_str;
-    if (ss >> key && ss >> sign && std::getline(ss, value_str) && (sign == '+' || sign == '-'))
-    {
-        params->sparams.logit_bias[key] = std::stof(value_str) * ((sign == '-') ? -1.0f : 1.0f);
-    }
-    params->sparams.penalty_freq = frequency_penalty;
-    params->prompt = prompt;
+    output->sparams.top_k = simple->top_k;
+    output->sparams.top_p = simple->top_p;
+    output->sparams.min_p = simple->min_p;
+    output->sparams.tfs_z = simple->tfs_z;
+    output->sparams.typical_p = simple->typical_p;
+    output->sparams.temp = simple->temp;
+    output->sparams.dynatemp_range = simple->dynatemp_range;
+    output->sparams.dynatemp_exponent = simple->dynatemp_exponent;
+    output->sparams.penalty_last_n = simple->penalty_last_n;
+    output->sparams.penalty_repeat = simple->penalty_repeat;
+    output->sparams.penalty_freq = simple->penalty_freq;
+    output->sparams.penalty_present = simple->penalty_present;
+    output->sparams.mirostat = simple->mirostat;
+    output->sparams.mirostat_tau = simple->mirostat_tau;
+    output->sparams.mirostat_eta = simple->mirostat_eta;
+    output->sparams.penalize_nl = simple->penalize_nl;
 
-    return params;
 }
+    

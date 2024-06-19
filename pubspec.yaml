@@ -21,11 +21,12 @@ ffigen:
   output: 'lib/src/llama_cpp_bindings.dart'
   llvm-path:
     - '/opt/homebrew/opt/llvm'
-  #ignore-source-errors: true
+  ignore-source-errors: true
   #exclude-all-by-default: true
   headers:
     entry-points:
-      - 'src/llama.cpp/bindings.h'
+      - 'src/bindings.h'
+      - 'src/llama.cpp/llama.h'
   compiler-opts:
     - '-Isrc/llama.cpp/'
 #    - '-I/usr/lib/clang/17/include'
