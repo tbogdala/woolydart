@@ -12937,21 +12937,23 @@ class woolydart {
     ffi.Pointer<ffi.Char> fname,
     llama_model_params model_params,
     llama_context_params context_params,
+    bool silent_llama,
   ) {
     return _wooly_load_model(
       fname,
       model_params,
       context_params,
+      silent_llama,
     );
   }
 
   late final _wooly_load_modelPtr = _lookup<
       ffi.NativeFunction<
           load_model_result Function(ffi.Pointer<ffi.Char>, llama_model_params,
-              llama_context_params)>>('wooly_load_model');
+              llama_context_params, ffi.Bool)>>('wooly_load_model');
   late final _wooly_load_model = _wooly_load_modelPtr.asFunction<
-      load_model_result Function(
-          ffi.Pointer<ffi.Char>, llama_model_params, llama_context_params)>();
+      load_model_result Function(ffi.Pointer<ffi.Char>, llama_model_params,
+          llama_context_params, bool)>();
 
   void wooly_free_model(
     ffi.Pointer<llama_context> ctx_ptr,

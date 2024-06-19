@@ -11,7 +11,10 @@
 // internal functions headers
 void fill_gpt_params_from_simple(gpt_params_simple *simple, struct gpt_params *output);
 
-
+static void llama_log_callback_silent(ggml_log_level level, const char * text, void * user_data) 
+{
+    // do nothing. :D
+}
 
 typedef struct llama_predict_prompt_cache {
     std::string last_prompt;
@@ -65,9 +68,12 @@ static std::string llama_token_to_str(const struct llama_context * ctx, llama_to
 
 
 load_model_result wooly_load_model(
-    const char *fname, struct llama_model_params model_params, struct llama_context_params context_params)
+    const char *fname, struct llama_model_params model_params, struct llama_context_params context_params, bool silent_llama)
 {
     log_disable();
+    if (silent_llama) {
+        llama_log_set(llama_log_callback_silent, NULL);
+    }
     llama_backend_init();
     llama_numa_init(GGML_NUMA_STRATEGY_DISABLED);
     

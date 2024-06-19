@@ -28,15 +28,18 @@ class LlamaModel {
 
   // Load a model at the filepath specified in modelFile. The model and context
   // parameters are used when loading the model and creating a new context to
-  // operate from. Should the process fail, false is returned.
+  // operate from. The silenceLlamaCpp boolean will allow the client code to
+  // disable all of the information that upstream llama.cpp writes to output streams.
+  //
+  // Should the process fail, false is returned.
   bool loadModel(String modelFile, llama_model_params modelParams,
-      llama_context_params contextParams) {
+      llama_context_params contextParams, bool silenceLlamaCpp) {
     var nativeModelPath =
         "/Users/timothy/.cache/lm-studio/models/SanctumAI/Phi-3-mini-4k-instruct-GGUF/phi-3-mini-4k-instruct.Q8_0.gguf"
             .toNativeUtf8();
 
-    var loadedModel = lib.wooly_load_model(
-        nativeModelPath as Pointer<Char>, modelParams, contextParams);
+    var loadedModel = lib.wooly_load_model(nativeModelPath as Pointer<Char>,
+        modelParams, contextParams, silenceLlamaCpp);
 
     malloc.free(nativeModelPath);
 
@@ -60,8 +63,7 @@ class LlamaModel {
   // Gets a default copy of the context parameters using default settings from
   // llama.cpp.
   llama_context_params getDefaultContextParams() {
-    var contextParams = lib.llama_context_default_params();
-    return contextParams;
+    return lib.llama_context_default_params();
   }
 
   // Gets a default copy of the model parameters using default settings from

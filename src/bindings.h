@@ -106,7 +106,8 @@ typedef struct gpt_params_simple {
 LLAMA_API load_model_result wooly_load_model(
     const char *fname, 
     struct llama_model_params model_params, 
-    struct llama_context_params context_params);
+    struct llama_context_params context_params,
+    bool silent_llama);
         
 LLAMA_API void wooly_free_model(struct llama_context *ctx_ptr, struct llama_model *model_ptr);
 

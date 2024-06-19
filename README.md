@@ -9,16 +9,16 @@ At present, it is in pre-alpha development and highly unstable.
 
 ## Build notes
 
-* `llama.cpp` is now a submodule in `./src` and will need to be pulled and updated with `--recurse-submodules`.
+`llama.cpp` is now a submodule in `./src` and will need to be pulled and updated with `--recurse-submodules`.
 
-* Before building the upstream project, run the patch to include the custom bindings:
+Before building the upstream project, run the patch to include the custom bindings:
 
 ```bash
 cd src/llama.cpp
 git apply ../llamacpp_patch.patch
 ```
 
-* Built MacOs with the following commands:
+Built MacOs with the following commands:
 
 ```bash
 cd src/llama.cpp
@@ -28,12 +28,23 @@ make build_info
 cmake --build . --config Release
 ```
 
-* Once the upstream `llama.cpp` libraries have been built, the Dart wrappers should function. You can run the
-  tests by using the following command:
+Once the upstream `llama.cpp` libraries have been built, the Dart wrappers should function. You can run the
+tests by using the following command:
 
-  ```bash
-  dart test
-  ```
+```bash
+dart test
+```
+
+
+## Examples
+
+The basic example can be run with the following command (use `--help` to see all command-line arguments):
+
+```bash
+dart examples/basic_example.dart -m <GGUF file path>
+```
+
+Make sure to actually specify a GGUF file path so it can load the model for testing.
 
 
 ### Developer Notes
@@ -43,3 +54,7 @@ cmake --build . --config Release
 * FFIGEN invoked as `dart run ffigen`, but that shouldn't need to be done by consumers of the library unless you're
   updating the `llama.cpp` bindings yourself.
 
+
+### TODO
+
+* Reenable some advanced sampling features again like grammar and logit biases.

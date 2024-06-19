@@ -29,7 +29,7 @@ void main() {
     contextParams.n_ctx = 0;
 
     var loadedModel = lib.wooly_load_model(
-        modelPath as Pointer<Char>, modelParams, contextParams);
+        modelPath as Pointer<Char>, modelParams, contextParams, true);
 
     test('Model load test', () {
       expect(loadedModel.model, isNotNull);
@@ -104,7 +104,7 @@ void main() {
     print(format('Generated text:\n{}', outputString));
 
     print(format(
-        '\nTiming Data: {} tokens total in {:.2} ms ; {:.2} T/s\n',
+        '\nTiming Data: {} tokens total in {:.2f} ms ; {:.2f} T/s\n',
         predictResult.n_eval,
         (predictResult.t_end_ms - predictResult.t_start_ms),
         1e3 /
@@ -149,7 +149,7 @@ void main() {
     contextParams.n_ctx = 0;
 
     final loadedResult =
-        llamaModel.loadModel(modelFilepath, modelParams, contextParams);
+        llamaModel.loadModel(modelFilepath, modelParams, contextParams, true);
 
     test('Model load test', () {
       expect(loadedResult, true);
@@ -193,7 +193,7 @@ void main() {
     // Print out the generated text for fun as well as some stats on timing.
     print(format('Generated text:\n{}', outputString ?? "<failed prediction>"));
     print(format(
-        '\nTiming Data: {} tokens total in {:.2} ms ; {:.2} T/s\n',
+        '\nTiming Data: {} tokens total in {:.2f} ms ; {:.2f} T/s\n',
         predictResult.n_eval,
         (predictResult.t_end_ms - predictResult.t_start_ms),
         1e3 /
