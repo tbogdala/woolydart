@@ -4,7 +4,9 @@ A Dart wrapper around the [llama.cpp library](https://github.com/ggerganov/llama
 API that provides enough functionality to be versatile, but also exposes the raw llama.cpp C callable functions
 for further lower level access if desired.
 
-At present, it is in pre-alpha development and highly unstable.
+At present, it is in pre-alpha development and highly unstable. 
+
+Upstream llama.cpp is pinned to commit [abd894a](https://github.com/ggerganov/llama.cpp/commit/abd894ad96a242043b8e197ec130d8649eead22e).
 
 
 ## Build notes
