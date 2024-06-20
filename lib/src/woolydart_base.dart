@@ -6,8 +6,14 @@ import 'package:woolydart/woolydart.dart';
 class LlamaModel {
   late woolydart lib;
 
-  Pointer<llama_context> ctx = nullptr; // internal handle to the context
-  Pointer<llama_model> model = nullptr; // internal handle to the loaded model
+  // internal handle to the context
+  Pointer<llama_context> ctx = nullptr;
+
+  // internal handle to the loaded model
+  Pointer<llama_model> model = nullptr;
+
+  // internal handle to prompt cache from last prediction
+  Pointer<Void> last_prompt_cache = nullptr;
 
   // the size of the context used to load the model
   int _loadedContextLength = 0;
@@ -34,9 +40,7 @@ class LlamaModel {
   // Should the process fail, false is returned.
   bool loadModel(String modelFile, llama_model_params modelParams,
       llama_context_params contextParams, bool silenceLlamaCpp) {
-    var nativeModelPath =
-        "/Users/timothy/.cache/lm-studio/models/SanctumAI/Phi-3-mini-4k-instruct-GGUF/phi-3-mini-4k-instruct.Q8_0.gguf"
-            .toNativeUtf8();
+    var nativeModelPath = modelFile.toNativeUtf8();
 
     var loadedModel = lib.wooly_load_model(nativeModelPath as Pointer<Char>,
         modelParams, contextParams, silenceLlamaCpp);
@@ -49,12 +53,16 @@ class LlamaModel {
 
     model = loadedModel.model;
     ctx = loadedModel.ctx;
+    last_prompt_cache = nullptr;
     _loadedContextLength = lib.llama_n_ctx(ctx);
     return true;
   }
 
   void freeModel() {
     lib.wooly_free_model(ctx, model);
+    if (last_prompt_cache != nullptr) {
+      lib.wooly_free_prompt_cache(last_prompt_cache);
+    }
     ctx = nullptr;
     model = nullptr;
     _loadedContextLength = 0;
@@ -87,14 +95,19 @@ class LlamaModel {
     final outputText =
         calloc.allocate(_loadedContextLength * 4) as Pointer<Char>;
 
-    var predictResult =
-        lib.wooly_predict(params, ctx, model, false, outputText, nullptr);
+    var predictResult = lib.wooly_predict(
+        params, ctx, model, false, outputText, last_prompt_cache);
 
     String? outputString;
 
     // if we had a successful run, try to make the output string
     if (predictResult.result == 0) {
       outputString = (outputText as Pointer<Utf8>).toDartString();
+      if (params.prompt_cache_all) {
+        last_prompt_cache = predictResult.prompt_cache;
+      } else {
+        lib.wooly_free_prompt_cache(predictResult.prompt_cache);
+      }
     }
 
     calloc.free(outputText);

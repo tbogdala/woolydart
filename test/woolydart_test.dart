@@ -2,7 +2,6 @@ import 'dart:ffi';
 import 'dart:io';
 import 'package:ffi/ffi.dart';
 import 'package:format/format.dart';
-import 'package:woolydart/src/llama_cpp_bindings.dart';
 import 'package:test/test.dart';
 import 'dart:developer';
 
@@ -43,6 +42,7 @@ void main() {
     params.seed = 42;
     params.n_threads = 4;
     params.n_predict = 100;
+    params.temp = 0.1;
     params.top_k = 1;
     params.top_p = 1.0;
     params.min_p = 0.1;
@@ -75,6 +75,7 @@ void main() {
         Pointer<Char> native =
             antipromptStrings[ai].toNativeUtf8() as Pointer<Char>;
         antiPointers[ai] = native;
+
         antipromptPointers.add(native);
       }
 
@@ -104,12 +105,15 @@ void main() {
     print(format('Generated text:\n{}', outputString));
 
     print(format(
-        '\nTiming Data: {} tokens total in {:.2f} ms ; {:.2f} T/s\n',
+        '\nTiming Data: {} tokens total in {:.2f} ms ({:.2f} T/s) ; {} prompt tokens in {:.2f} ms ({:.2f} T/s)\n\n',
         predictResult.n_eval,
         (predictResult.t_end_ms - predictResult.t_start_ms),
         1e3 /
             (predictResult.t_end_ms - predictResult.t_start_ms) *
-            predictResult.n_eval));
+            predictResult.n_eval,
+        predictResult.n_p_eval,
+        predictResult.t_p_eval_ms,
+        1e3 / predictResult.t_p_eval_ms * predictResult.n_p_eval));
 
     tearDownAll(() {
       // free the allocated text buffer
@@ -161,6 +165,7 @@ void main() {
     params.seed = 42;
     params.n_threads = 4;
     params.n_predict = 100;
+    params.temp = 0.1;
     params.top_k = 1;
     params.top_p = 1.0;
     params.min_p = 0.1;
@@ -170,7 +175,7 @@ void main() {
     params.ignore_eos = false;
     params.flash_attn = true;
     params.n_batch = 128;
-    params.prompt_cache_all = false;
+    params.prompt_cache_all = true;
     params.setPrompt(
         "<|user|>\nWrite the start to the next movie collaboration between Quentin Tarantino and Robert Rodriguez.<|end|>\n<|assistant|>\n");
     params.setAntiprompts([
@@ -184,7 +189,7 @@ void main() {
       expect(params.antiprompt_count, equals(1));
     });
 
-    final (predictResult, outputString) = llamaModel.predictText(params);
+    var (predictResult, outputString) = llamaModel.predictText(params);
 
     test('Text Prediction', () {
       expect(predictResult.result, 0);
@@ -193,12 +198,43 @@ void main() {
     // Print out the generated text for fun as well as some stats on timing.
     print(format('Generated text:\n{}', outputString ?? "<failed prediction>"));
     print(format(
-        '\nTiming Data: {} tokens total in {:.2f} ms ; {:.2f} T/s\n',
+        '\nTiming Data: {} tokens total in {:.2f} ms ({:.2f} T/s) ; {} prompt tokens in {:.2f} ms ({:.2f} T/s)\n\n',
         predictResult.n_eval,
         (predictResult.t_end_ms - predictResult.t_start_ms),
         1e3 /
             (predictResult.t_end_ms - predictResult.t_start_ms) *
-            predictResult.n_eval));
+            predictResult.n_eval,
+        predictResult.n_p_eval,
+        predictResult.t_p_eval_ms,
+        1e3 / predictResult.t_p_eval_ms * predictResult.n_p_eval));
+
+    // change the seed and generate again with the same prompt. this should trigger
+    // the use of the prompt cache and drop n_p_eval and t_p_eval_ms down to 0.
+    params.seed = 1337;
+
+    var (predictResult2, outputString2) = llamaModel.predictText(params);
+
+    test('Text Prediction', () {
+      expect(predictResult2.result, 0);
+      expect(predictResult2.n_p_eval, 0);
+      expect(predictResult2.t_p_eval_ms, 0);
+    });
+
+    // Print out the generated text for fun as well as some stats on timing.
+    print(format('\nUsing the same prompt but different seed:\n{}',
+        outputString2 ?? "<failed prediction>"));
+    print(
+      format(
+          '\nTiming Data: {} tokens total in {:.2f} ms ({:.2f} T/s) ; {} prompt tokens in {:.2f} ms ({:.2f} T/s)\n',
+          predictResult2.n_eval,
+          (predictResult2.t_end_ms - predictResult2.t_start_ms),
+          1e3 /
+              (predictResult2.t_end_ms - predictResult2.t_start_ms) *
+              predictResult2.n_eval,
+          predictResult2.n_p_eval,
+          predictResult2.t_p_eval_ms,
+          1e3 / predictResult2.t_p_eval_ms * predictResult2.n_p_eval),
+    );
 
     // free the allocated memory
     tearDownAll(() {

@@ -96,12 +96,15 @@ void main(List<String> args) {
 
   // print out some stats from diming data returned by the text generation func.
   print(format(
-      '\nText Generation Speeds: {} tokens total in {:.2f} ms ; {:.02f} T/s',
+      '\nPerformance data: {} tokens total in {:.2f} ms ({:.2f} T/s) ; {} prompt tokens in {:.2f} ms ({:.2f} T/s)\n\n',
       predictResult.n_eval,
       (predictResult.t_end_ms - predictResult.t_start_ms),
       1e3 /
           (predictResult.t_end_ms - predictResult.t_start_ms) *
-          predictResult.n_eval));
+          predictResult.n_eval,
+      predictResult.n_p_eval,
+      predictResult.t_p_eval_ms,
+      1e3 / predictResult.t_p_eval_ms * predictResult.n_p_eval));
 
   // we'll be a good citizen and clean up after ourselves. params needs to
   // be disposed to free the memory allocated by prompts and antiprompts.
