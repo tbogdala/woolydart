@@ -101,7 +101,9 @@ typedef struct gpt_params_simple {
 
 } gpt_params_simple;
 
-
+// the token update callback for wooly_redict should return a bool indicating if prediction should continue (true),
+// or if the prediction should stop (false).
+typedef bool (*token_update_callback)(const char *token_str);
 
 LLAMA_API load_model_result wooly_load_model(
     const char *fname, 
@@ -115,7 +117,7 @@ LLAMA_API gpt_params_simple wooly_new_params();
 
 LLAMA_API wooly_predict_result wooly_predict(
     gpt_params_simple simple_params, struct llama_context *ctx_ptr, struct llama_model *model_ptr, bool include_specials, char *out_result, 
-    void* prompt_cache_ptr);    
+    void* prompt_cache_ptr, token_update_callback token_cb);    
 
 // free the pointer returned in wooly_predict_result from llama_predict().
 // only needed if you're not intending to use the prompt cache feature

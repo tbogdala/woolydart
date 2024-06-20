@@ -2077,20 +2077,6 @@ class woolydart {
   late final _ggml_is_transposed = _ggml_is_transposedPtr
       .asFunction<bool Function(ffi.Pointer<ggml_tensor>)>();
 
-  bool ggml_is_contiguous(
-    ffi.Pointer<ggml_tensor> tensor,
-  ) {
-    return _ggml_is_contiguous(
-      tensor,
-    );
-  }
-
-  late final _ggml_is_contiguousPtr =
-      _lookup<ffi.NativeFunction<ffi.Bool Function(ffi.Pointer<ggml_tensor>)>>(
-          'ggml_is_contiguous');
-  late final _ggml_is_contiguous = _ggml_is_contiguousPtr
-      .asFunction<bool Function(ffi.Pointer<ggml_tensor>)>();
-
   bool ggml_is_permuted(
     ffi.Pointer<ggml_tensor> tensor,
   ) {
@@ -2188,6 +2174,62 @@ class woolydart {
           'ggml_n_dims');
   late final _ggml_n_dims =
       _ggml_n_dimsPtr.asFunction<int Function(ffi.Pointer<ggml_tensor>)>();
+
+  bool ggml_is_contiguous(
+    ffi.Pointer<ggml_tensor> tensor,
+  ) {
+    return _ggml_is_contiguous(
+      tensor,
+    );
+  }
+
+  late final _ggml_is_contiguousPtr =
+      _lookup<ffi.NativeFunction<ffi.Bool Function(ffi.Pointer<ggml_tensor>)>>(
+          'ggml_is_contiguous');
+  late final _ggml_is_contiguous = _ggml_is_contiguousPtr
+      .asFunction<bool Function(ffi.Pointer<ggml_tensor>)>();
+
+  bool ggml_is_contiguous_0(
+    ffi.Pointer<ggml_tensor> tensor,
+  ) {
+    return _ggml_is_contiguous_0(
+      tensor,
+    );
+  }
+
+  late final _ggml_is_contiguous_0Ptr =
+      _lookup<ffi.NativeFunction<ffi.Bool Function(ffi.Pointer<ggml_tensor>)>>(
+          'ggml_is_contiguous_0');
+  late final _ggml_is_contiguous_0 = _ggml_is_contiguous_0Ptr
+      .asFunction<bool Function(ffi.Pointer<ggml_tensor>)>();
+
+  bool ggml_is_contiguous_1(
+    ffi.Pointer<ggml_tensor> tensor,
+  ) {
+    return _ggml_is_contiguous_1(
+      tensor,
+    );
+  }
+
+  late final _ggml_is_contiguous_1Ptr =
+      _lookup<ffi.NativeFunction<ffi.Bool Function(ffi.Pointer<ggml_tensor>)>>(
+          'ggml_is_contiguous_1');
+  late final _ggml_is_contiguous_1 = _ggml_is_contiguous_1Ptr
+      .asFunction<bool Function(ffi.Pointer<ggml_tensor>)>();
+
+  bool ggml_is_contiguous_2(
+    ffi.Pointer<ggml_tensor> tensor,
+  ) {
+    return _ggml_is_contiguous_2(
+      tensor,
+    );
+  }
+
+  late final _ggml_is_contiguous_2Ptr =
+      _lookup<ffi.NativeFunction<ffi.Bool Function(ffi.Pointer<ggml_tensor>)>>(
+          'ggml_is_contiguous_2');
+  late final _ggml_is_contiguous_2 = _ggml_is_contiguous_2Ptr
+      .asFunction<bool Function(ffi.Pointer<ggml_tensor>)>();
 
   bool ggml_are_same_shape(
     ffi.Pointer<ggml_tensor> t0,
@@ -3556,11 +3598,13 @@ class woolydart {
     ffi.Pointer<ggml_context> ctx,
     ffi.Pointer<ggml_tensor> a,
     ffi.Pointer<ggml_tensor> b,
+    int dim,
   ) {
     return _ggml_concat(
       ctx,
       a,
       b,
+      dim,
     );
   }
 
@@ -3569,10 +3613,11 @@ class woolydart {
           ffi.Pointer<ggml_tensor> Function(
               ffi.Pointer<ggml_context>,
               ffi.Pointer<ggml_tensor>,
-              ffi.Pointer<ggml_tensor>)>>('ggml_concat');
+              ffi.Pointer<ggml_tensor>,
+              ffi.Int)>>('ggml_concat');
   late final _ggml_concat = _ggml_concatPtr.asFunction<
       ffi.Pointer<ggml_tensor> Function(ffi.Pointer<ggml_context>,
-          ffi.Pointer<ggml_tensor>, ffi.Pointer<ggml_tensor>)>();
+          ffi.Pointer<ggml_tensor>, ffi.Pointer<ggml_tensor>, int)>();
 
   ffi.Pointer<ggml_tensor> ggml_abs(
     ffi.Pointer<ggml_context> ctx,
@@ -5253,7 +5298,6 @@ class woolydart {
     ffi.Pointer<ggml_tensor> b,
     int n_dims,
     int mode,
-    int n_ctx,
   ) {
     return _ggml_rope(
       ctx,
@@ -5261,7 +5305,6 @@ class woolydart {
       b,
       n_dims,
       mode,
-      n_ctx,
     );
   }
 
@@ -5272,11 +5315,10 @@ class woolydart {
               ffi.Pointer<ggml_tensor>,
               ffi.Pointer<ggml_tensor>,
               ffi.Int,
-              ffi.Int,
               ffi.Int)>>('ggml_rope');
   late final _ggml_rope = _ggml_ropePtr.asFunction<
       ffi.Pointer<ggml_tensor> Function(ffi.Pointer<ggml_context>,
-          ffi.Pointer<ggml_tensor>, ffi.Pointer<ggml_tensor>, int, int, int)>();
+          ffi.Pointer<ggml_tensor>, ffi.Pointer<ggml_tensor>, int, int)>();
 
   ffi.Pointer<ggml_tensor> ggml_rope_inplace(
     ffi.Pointer<ggml_context> ctx,
@@ -5284,7 +5326,6 @@ class woolydart {
     ffi.Pointer<ggml_tensor> b,
     int n_dims,
     int mode,
-    int n_ctx,
   ) {
     return _ggml_rope_inplace(
       ctx,
@@ -5292,7 +5333,6 @@ class woolydart {
       b,
       n_dims,
       mode,
-      n_ctx,
     );
   }
 
@@ -5303,11 +5343,10 @@ class woolydart {
               ffi.Pointer<ggml_tensor>,
               ffi.Pointer<ggml_tensor>,
               ffi.Int,
-              ffi.Int,
               ffi.Int)>>('ggml_rope_inplace');
   late final _ggml_rope_inplace = _ggml_rope_inplacePtr.asFunction<
       ffi.Pointer<ggml_tensor> Function(ffi.Pointer<ggml_context>,
-          ffi.Pointer<ggml_tensor>, ffi.Pointer<ggml_tensor>, int, int, int)>();
+          ffi.Pointer<ggml_tensor>, ffi.Pointer<ggml_tensor>, int, int)>();
 
   ffi.Pointer<ggml_tensor> ggml_rope_ext(
     ffi.Pointer<ggml_context> ctx,
@@ -5316,8 +5355,7 @@ class woolydart {
     ffi.Pointer<ggml_tensor> c,
     int n_dims,
     int mode,
-    int n_ctx,
-    int n_orig_ctx,
+    int n_ctx_orig,
     double freq_base,
     double freq_scale,
     double ext_factor,
@@ -5332,8 +5370,7 @@ class woolydart {
       c,
       n_dims,
       mode,
-      n_ctx,
-      n_orig_ctx,
+      n_ctx_orig,
       freq_base,
       freq_scale,
       ext_factor,
@@ -5353,7 +5390,6 @@ class woolydart {
               ffi.Int,
               ffi.Int,
               ffi.Int,
-              ffi.Int,
               ffi.Float,
               ffi.Float,
               ffi.Float,
@@ -5366,7 +5402,6 @@ class woolydart {
           ffi.Pointer<ggml_tensor>,
           ffi.Pointer<ggml_tensor>,
           ffi.Pointer<ggml_tensor>,
-          int,
           int,
           int,
           int,
@@ -5384,8 +5419,7 @@ class woolydart {
     ffi.Pointer<ggml_tensor> c,
     int n_dims,
     int mode,
-    int n_ctx,
-    int n_orig_ctx,
+    int n_ctx_orig,
     double freq_base,
     double freq_scale,
     double ext_factor,
@@ -5400,8 +5434,7 @@ class woolydart {
       c,
       n_dims,
       mode,
-      n_ctx,
-      n_orig_ctx,
+      n_ctx_orig,
       freq_base,
       freq_scale,
       ext_factor,
@@ -5421,7 +5454,6 @@ class woolydart {
               ffi.Int,
               ffi.Int,
               ffi.Int,
-              ffi.Int,
               ffi.Float,
               ffi.Float,
               ffi.Float,
@@ -5434,7 +5466,6 @@ class woolydart {
           ffi.Pointer<ggml_tensor>,
           ffi.Pointer<ggml_tensor>,
           ffi.Pointer<ggml_tensor>,
-          int,
           int,
           int,
           int,
@@ -5451,8 +5482,7 @@ class woolydart {
     ffi.Pointer<ggml_tensor> b,
     int n_dims,
     int mode,
-    int n_ctx,
-    int n_orig_ctx,
+    int n_ctx_orig,
     double freq_base,
     double freq_scale,
     double ext_factor,
@@ -5466,8 +5496,7 @@ class woolydart {
       b,
       n_dims,
       mode,
-      n_ctx,
-      n_orig_ctx,
+      n_ctx_orig,
       freq_base,
       freq_scale,
       ext_factor,
@@ -5486,7 +5515,6 @@ class woolydart {
               ffi.Int,
               ffi.Int,
               ffi.Int,
-              ffi.Int,
               ffi.Float,
               ffi.Float,
               ffi.Float,
@@ -5498,7 +5526,6 @@ class woolydart {
           ffi.Pointer<ggml_context>,
           ffi.Pointer<ggml_tensor>,
           ffi.Pointer<ggml_tensor>,
-          int,
           int,
           int,
           int,
@@ -5515,8 +5542,7 @@ class woolydart {
     ffi.Pointer<ggml_tensor> b,
     int n_dims,
     int mode,
-    int n_ctx,
-    int n_orig_ctx,
+    int n_ctx_orig,
     double freq_base,
     double freq_scale,
     double ext_factor,
@@ -5530,8 +5556,7 @@ class woolydart {
       b,
       n_dims,
       mode,
-      n_ctx,
-      n_orig_ctx,
+      n_ctx_orig,
       freq_base,
       freq_scale,
       ext_factor,
@@ -5550,7 +5575,6 @@ class woolydart {
               ffi.Int,
               ffi.Int,
               ffi.Int,
-              ffi.Int,
               ffi.Float,
               ffi.Float,
               ffi.Float,
@@ -5566,7 +5590,6 @@ class woolydart {
               int,
               int,
               int,
-              int,
               double,
               double,
               double,
@@ -5576,7 +5599,7 @@ class woolydart {
 
   void ggml_rope_yarn_corr_dims(
     int n_dims,
-    int n_orig_ctx,
+    int n_ctx_orig,
     double freq_base,
     double beta_fast,
     double beta_slow,
@@ -5584,7 +5607,7 @@ class woolydart {
   ) {
     return _ggml_rope_yarn_corr_dims(
       n_dims,
-      n_orig_ctx,
+      n_ctx_orig,
       freq_base,
       beta_fast,
       beta_slow,
@@ -5608,16 +5631,13 @@ class woolydart {
     ffi.Pointer<ggml_tensor> c,
     int n_dims,
     int mode,
-    int n_ctx,
-    int n_orig_ctx,
+    int n_ctx_orig,
     double freq_base,
     double freq_scale,
     double ext_factor,
     double attn_factor,
     double beta_fast,
     double beta_slow,
-    double xpos_base,
-    bool xpos_down,
   ) {
     return _ggml_rope_back(
       ctx,
@@ -5626,16 +5646,13 @@ class woolydart {
       c,
       n_dims,
       mode,
-      n_ctx,
-      n_orig_ctx,
+      n_ctx_orig,
       freq_base,
       freq_scale,
       ext_factor,
       attn_factor,
       beta_fast,
       beta_slow,
-      xpos_base,
-      xpos_down,
     );
   }
 
@@ -5649,15 +5666,12 @@ class woolydart {
               ffi.Int,
               ffi.Int,
               ffi.Int,
-              ffi.Int,
               ffi.Float,
               ffi.Float,
               ffi.Float,
               ffi.Float,
               ffi.Float,
-              ffi.Float,
-              ffi.Float,
-              ffi.Bool)>>('ggml_rope_back');
+              ffi.Float)>>('ggml_rope_back');
   late final _ggml_rope_back = _ggml_rope_backPtr.asFunction<
       ffi.Pointer<ggml_tensor> Function(
           ffi.Pointer<ggml_context>,
@@ -5667,15 +5681,12 @@ class woolydart {
           int,
           int,
           int,
-          int,
           double,
           double,
           double,
           double,
           double,
-          double,
-          double,
-          bool)>();
+          double)>();
 
   ffi.Pointer<ggml_tensor> ggml_clamp(
     ffi.Pointer<ggml_context> ctx,
@@ -8865,15 +8876,6 @@ class woolydart {
   late final _ggml_cpu_has_cuda =
       _ggml_cpu_has_cudaPtr.asFunction<int Function()>();
 
-  int ggml_cpu_has_clblast() {
-    return _ggml_cpu_has_clblast();
-  }
-
-  late final _ggml_cpu_has_clblastPtr =
-      _lookup<ffi.NativeFunction<ffi.Int Function()>>('ggml_cpu_has_clblast');
-  late final _ggml_cpu_has_clblast =
-      _ggml_cpu_has_clblastPtr.asFunction<int Function()>();
-
   int ggml_cpu_has_vulkan() {
     return _ggml_cpu_has_vulkan();
   }
@@ -8927,6 +8929,15 @@ class woolydart {
       _lookup<ffi.NativeFunction<ffi.Int Function()>>('ggml_cpu_has_sycl');
   late final _ggml_cpu_has_sycl =
       _ggml_cpu_has_syclPtr.asFunction<int Function()>();
+
+  int ggml_cpu_has_rpc() {
+    return _ggml_cpu_has_rpc();
+  }
+
+  late final _ggml_cpu_has_rpcPtr =
+      _lookup<ffi.NativeFunction<ffi.Int Function()>>('ggml_cpu_has_rpc');
+  late final _ggml_cpu_has_rpc =
+      _ggml_cpu_has_rpcPtr.asFunction<int Function()>();
 
   int ggml_cpu_has_vsx() {
     return _ggml_cpu_has_vsx();
@@ -9232,24 +9243,6 @@ class woolydart {
   late final _ggml_backend_buft_get_alloc_size =
       _ggml_backend_buft_get_alloc_sizePtr.asFunction<
           int Function(ggml_backend_buffer_type_t, ffi.Pointer<ggml_tensor>)>();
-
-  bool ggml_backend_buft_supports_backend(
-    ggml_backend_buffer_type_t buft,
-    ggml_backend_t backend,
-  ) {
-    return _ggml_backend_buft_supports_backend(
-      buft,
-      backend,
-    );
-  }
-
-  late final _ggml_backend_buft_supports_backendPtr = _lookup<
-      ffi.NativeFunction<
-          ffi.Bool Function(ggml_backend_buffer_type_t,
-              ggml_backend_t)>>('ggml_backend_buft_supports_backend');
-  late final _ggml_backend_buft_supports_backend =
-      _ggml_backend_buft_supports_backendPtr.asFunction<
-          bool Function(ggml_backend_buffer_type_t, ggml_backend_t)>();
 
   bool ggml_backend_buft_is_host(
     ggml_backend_buffer_type_t buft,
@@ -9791,6 +9784,23 @@ class woolydart {
   late final _ggml_backend_supports_op = _ggml_backend_supports_opPtr
       .asFunction<bool Function(ggml_backend_t, ffi.Pointer<ggml_tensor>)>();
 
+  bool ggml_backend_supports_buft(
+    ggml_backend_t backend,
+    ggml_backend_buffer_type_t buft,
+  ) {
+    return _ggml_backend_supports_buft(
+      backend,
+      buft,
+    );
+  }
+
+  late final _ggml_backend_supports_buftPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Bool Function(ggml_backend_t,
+              ggml_backend_buffer_type_t)>>('ggml_backend_supports_buft');
+  late final _ggml_backend_supports_buft = _ggml_backend_supports_buftPtr
+      .asFunction<bool Function(ggml_backend_t, ggml_backend_buffer_type_t)>();
+
   bool ggml_backend_offload_op(
     ggml_backend_t backend,
     ffi.Pointer<ggml_tensor> op,
@@ -10178,6 +10188,39 @@ class woolydart {
       _ggml_backend_sched_reservePtr.asFunction<
           bool Function(ggml_backend_sched_t, ffi.Pointer<ggml_cgraph>)>();
 
+  int ggml_backend_sched_get_n_backends(
+    ggml_backend_sched_t sched,
+  ) {
+    return _ggml_backend_sched_get_n_backends(
+      sched,
+    );
+  }
+
+  late final _ggml_backend_sched_get_n_backendsPtr =
+      _lookup<ffi.NativeFunction<ffi.Int Function(ggml_backend_sched_t)>>(
+          'ggml_backend_sched_get_n_backends');
+  late final _ggml_backend_sched_get_n_backends =
+      _ggml_backend_sched_get_n_backendsPtr
+          .asFunction<int Function(ggml_backend_sched_t)>();
+
+  ggml_backend_t ggml_backend_sched_get_backend(
+    ggml_backend_sched_t sched,
+    int i,
+  ) {
+    return _ggml_backend_sched_get_backend(
+      sched,
+      i,
+    );
+  }
+
+  late final _ggml_backend_sched_get_backendPtr = _lookup<
+      ffi.NativeFunction<
+          ggml_backend_t Function(ggml_backend_sched_t,
+              ffi.Int)>>('ggml_backend_sched_get_backend');
+  late final _ggml_backend_sched_get_backend =
+      _ggml_backend_sched_get_backendPtr
+          .asFunction<ggml_backend_t Function(ggml_backend_sched_t, int)>();
+
   int ggml_backend_sched_get_n_splits(
     ggml_backend_sched_t sched,
   ) {
@@ -10462,21 +10505,18 @@ class woolydart {
               ffi.Pointer<ffi.Void>)>();
 
   void ggml_backend_view_init(
-    ggml_backend_buffer_t buffer,
     ffi.Pointer<ggml_tensor> tensor,
   ) {
     return _ggml_backend_view_init(
-      buffer,
       tensor,
     );
   }
 
-  late final _ggml_backend_view_initPtr = _lookup<
-      ffi.NativeFunction<
-          ffi.Void Function(ggml_backend_buffer_t,
-              ffi.Pointer<ggml_tensor>)>>('ggml_backend_view_init');
-  late final _ggml_backend_view_init = _ggml_backend_view_initPtr.asFunction<
-      void Function(ggml_backend_buffer_t, ffi.Pointer<ggml_tensor>)>();
+  late final _ggml_backend_view_initPtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Pointer<ggml_tensor>)>>(
+          'ggml_backend_view_init');
+  late final _ggml_backend_view_init = _ggml_backend_view_initPtr
+      .asFunction<void Function(ffi.Pointer<ggml_tensor>)>();
 
   llama_model_params llama_model_default_params() {
     return _llama_model_default_params();
@@ -11921,21 +11961,21 @@ class woolydart {
   late final _llama_token_get_score = _llama_token_get_scorePtr
       .asFunction<double Function(ffi.Pointer<llama_model>, int)>();
 
-  int llama_token_get_type(
+  int llama_token_get_attr(
     ffi.Pointer<llama_model> model,
     int token,
   ) {
-    return _llama_token_get_type(
+    return _llama_token_get_attr(
       model,
       token,
     );
   }
 
-  late final _llama_token_get_typePtr = _lookup<
+  late final _llama_token_get_attrPtr = _lookup<
       ffi.NativeFunction<
           ffi.Int32 Function(
-              ffi.Pointer<llama_model>, llama_token)>>('llama_token_get_type');
-  late final _llama_token_get_type = _llama_token_get_typePtr
+              ffi.Pointer<llama_model>, llama_token)>>('llama_token_get_attr');
+  late final _llama_token_get_attr = _llama_token_get_attrPtr
       .asFunction<int Function(ffi.Pointer<llama_model>, int)>();
 
   bool llama_token_is_eog(
@@ -12755,44 +12795,6 @@ class woolydart {
           void Function(
               ffi.Pointer<llama_context>, ffi.Pointer<llama_grammar>, int)>();
 
-  /// @details Deterministically returns entire sentence constructed by a beam search.
-  /// @param ctx Pointer to the llama_context.
-  /// @param callback Invoked for each iteration of the beam_search loop, passing in beams_state.
-  /// @param callback_data A pointer that is simply passed back to callback.
-  /// @param n_beams Number of beams to use.
-  /// @param n_past Number of tokens already evaluated.
-  /// @param n_predict Maximum number of tokens to predict. EOS may occur earlier.
-  void llama_beam_search(
-    ffi.Pointer<llama_context> ctx,
-    llama_beam_search_callback_fn_t callback,
-    ffi.Pointer<ffi.Void> callback_data,
-    int n_beams,
-    int n_past,
-    int n_predict,
-  ) {
-    return _llama_beam_search(
-      ctx,
-      callback,
-      callback_data,
-      n_beams,
-      n_past,
-      n_predict,
-    );
-  }
-
-  late final _llama_beam_searchPtr = _lookup<
-      ffi.NativeFunction<
-          ffi.Void Function(
-              ffi.Pointer<llama_context>,
-              llama_beam_search_callback_fn_t,
-              ffi.Pointer<ffi.Void>,
-              ffi.Size,
-              ffi.Int32,
-              ffi.Int32)>>('llama_beam_search');
-  late final _llama_beam_search = _llama_beam_searchPtr.asFunction<
-      void Function(ffi.Pointer<llama_context>, llama_beam_search_callback_fn_t,
-          ffi.Pointer<ffi.Void>, int, int, int)>();
-
   /// @details Build a split GGUF final path for this chunk.
   /// llama_split_path(split_path, sizeof(split_path), "/models/ggml-model-q4_0", 2, 4) => split_path = "/models/ggml-model-q4_0-00002-of-00004.gguf"
   int llama_split_path(
@@ -12989,6 +12991,7 @@ class woolydart {
     bool include_specials,
     ffi.Pointer<ffi.Char> out_result,
     ffi.Pointer<ffi.Void> prompt_cache_ptr,
+    token_update_callback token_cb,
   ) {
     return _wooly_predict(
       simple_params,
@@ -12997,6 +13000,7 @@ class woolydart {
       include_specials,
       out_result,
       prompt_cache_ptr,
+      token_cb,
     );
   }
 
@@ -13008,7 +13012,8 @@ class woolydart {
               ffi.Pointer<llama_model>,
               ffi.Bool,
               ffi.Pointer<ffi.Char>,
-              ffi.Pointer<ffi.Void>)>>('wooly_predict');
+              ffi.Pointer<ffi.Void>,
+              token_update_callback)>>('wooly_predict');
   late final _wooly_predict = _wooly_predictPtr.asFunction<
       wooly_predict_result Function(
           gpt_params_simple,
@@ -13016,7 +13021,8 @@ class woolydart {
           ffi.Pointer<llama_model>,
           bool,
           ffi.Pointer<ffi.Char>,
-          ffi.Pointer<ffi.Void>)>();
+          ffi.Pointer<ffi.Void>,
+          token_update_callback)>();
 
   void wooly_free_prompt_cache(
     ffi.Pointer<ffi.Void> prompt_cache_ptr,
@@ -14101,6 +14107,7 @@ abstract class llama_vocab_pre_type {
   static const int LLAMA_VOCAB_PRE_TYPE_OLMO = 12;
   static const int LLAMA_VOCAB_PRE_TYPE_DBRX = 13;
   static const int LLAMA_VOCAB_PRE_TYPE_SMAUG = 14;
+  static const int LLAMA_VOCAB_PRE_TYPE_PORO = 15;
 }
 
 abstract class llama_rope_type {
@@ -14118,6 +14125,20 @@ abstract class llama_token_type {
   static const int LLAMA_TOKEN_TYPE_USER_DEFINED = 4;
   static const int LLAMA_TOKEN_TYPE_UNUSED = 5;
   static const int LLAMA_TOKEN_TYPE_BYTE = 6;
+}
+
+abstract class llama_token_attr {
+  static const int LLAMA_TOKEN_ATTR_UNDEFINED = 0;
+  static const int LLAMA_TOKEN_ATTR_UNKNOWN = 1;
+  static const int LLAMA_TOKEN_ATTR_UNUSED = 2;
+  static const int LLAMA_TOKEN_ATTR_NORMAL = 4;
+  static const int LLAMA_TOKEN_ATTR_CONTROL = 8;
+  static const int LLAMA_TOKEN_ATTR_USER_DEFINED = 16;
+  static const int LLAMA_TOKEN_ATTR_BYTE = 32;
+  static const int LLAMA_TOKEN_ATTR_NORMALIZED = 64;
+  static const int LLAMA_TOKEN_ATTR_LSTRIP = 128;
+  static const int LLAMA_TOKEN_ATTR_RSTRIP = 256;
+  static const int LLAMA_TOKEN_ATTR_SINGLE_WORD = 512;
 }
 
 abstract class llama_ftype {
@@ -14424,6 +14445,7 @@ abstract class llama_gretype {
   static const int LLAMA_GRETYPE_CHAR_NOT = 4;
   static const int LLAMA_GRETYPE_CHAR_RNG_UPPER = 5;
   static const int LLAMA_GRETYPE_CHAR_ALT = 6;
+  static const int LLAMA_GRETYPE_CHAR_ANY = 7;
 }
 
 final class llama_grammar_element extends ffi.Struct {
@@ -14498,38 +14520,6 @@ final class llama_kv_cache_view extends ffi.Struct {
   external ffi.Pointer<llama_seq_id> cells_sequences;
 }
 
-final class llama_beam_view extends ffi.Struct {
-  external ffi.Pointer<llama_token> tokens;
-
-  @ffi.Size()
-  external int n_tokens;
-
-  @ffi.Float()
-  external double p;
-
-  @ffi.Bool()
-  external bool eob;
-}
-
-final class llama_beams_state extends ffi.Struct {
-  external ffi.Pointer<llama_beam_view> beam_views;
-
-  @ffi.Size()
-  external int n_beams;
-
-  @ffi.Size()
-  external int common_prefix_length;
-
-  @ffi.Bool()
-  external bool last_call;
-}
-
-typedef llama_beam_search_callback_fn_t
-    = ffi.Pointer<ffi.NativeFunction<llama_beam_search_callback_fn_tFunction>>;
-typedef llama_beam_search_callback_fn_tFunction = ffi.Void Function(
-    ffi.Pointer<ffi.Void>, llama_beams_state);
-typedef Dartllama_beam_search_callback_fn_tFunction = void Function(
-    ffi.Pointer<ffi.Void>, llama_beams_state);
 typedef ggml_log_callback
     = ffi.Pointer<ffi.NativeFunction<ggml_log_callbackFunction>>;
 typedef ggml_log_callbackFunction = ffi.Void Function(ffi.Int32 level,
@@ -14702,6 +14692,13 @@ final class gpt_params_simple extends ffi.Struct {
   @ffi.Bool()
   external bool penalize_nl;
 }
+
+typedef token_update_callback
+    = ffi.Pointer<ffi.NativeFunction<token_update_callbackFunction>>;
+typedef token_update_callbackFunction = ffi.Bool Function(
+    ffi.Pointer<ffi.Char> token_str);
+typedef Darttoken_update_callbackFunction = bool Function(
+    ffi.Pointer<ffi.Char> token_str);
 
 const int __bool_true_false_are_defined = 1;
 

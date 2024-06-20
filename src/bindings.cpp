@@ -122,7 +122,7 @@ void wooly_free_model(llama_context *ctx, llama_model *model)
 
 wooly_predict_result wooly_predict(
     gpt_params_simple simple_params, struct llama_context *ctx, struct llama_model *model, bool include_specials, char *out_result, 
-    void* prompt_cache_ptr) 
+    void* prompt_cache_ptr, token_update_callback token_cb) 
 {
     llama_context *ctx_guidance = nullptr;
     gpt_params params;
@@ -535,12 +535,13 @@ wooly_predict_result wooly_predict(
 
             LOG("n_remain: %d\n", n_remain);
 
-            // FIXME: callback support
-            // call the token callback on the Rust side
-            // auto token_str = llama_token_to_str(ctx, id, include_specials);
-            // if (!tokenCallback(ctx_ptr, token_str.c_str())) {
-            //     break;
-            // }
+            // call the token callback with the newly predicted token
+            if (token_cb != NULL) {
+                auto token_str = llama_token_to_str(ctx, id, include_specials);
+                if (!token_cb(token_str.c_str())) {
+                    break;
+                }
+            }
 
             for (auto id : embd) {
                 res += llama_token_to_str(ctx, id, include_specials);

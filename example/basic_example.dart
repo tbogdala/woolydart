@@ -1,6 +1,9 @@
+import 'dart:ffi';
+
 import 'dart:io';
 
 import 'package:args/args.dart';
+import 'package:ffi/ffi.dart';
 import 'package:format/format.dart';
 import 'package:woolydart/woolydart.dart';
 
@@ -85,19 +88,23 @@ void main(List<String> args) {
   // now we actually run the text prediction using the parameters defined above.
   // the function returns a structure that has the overall success indicator
   // as well as timing information, as well as returning the full predicted output.
-  final (predictResult, outputString) = llamaModel.predictText(params);
+  final (predictResult, outputString) =
+      llamaModel.predictText(params, Pointer.fromFunction(onNewToken, false));
   if (predictResult.result != 0) {
     print('Error: LlamaModel.predictText() returned ${predictResult.result}');
     exit(1);
   }
 
-  // print out the predicted text
-  print('\n${outputString?.trim()}\n');
+  // we could print out the predicted text as a whole string, but that's already
+  // been done, piece by piece, with the `onNewToken()` callback defined below.
+  // print('\n${outputString?.trim()}\n');
+  final int totalCharacters = outputString!.length;
 
   // print out some stats from diming data returned by the text generation func.
   print(format(
-      '\nPerformance data: {} tokens total in {:.2f} ms ({:.2f} T/s) ; {} prompt tokens in {:.2f} ms ({:.2f} T/s)\n\n',
+      '\nPerformance data: {} tokens ({} characters) total in {:.2f} ms ({:.2f} T/s) ; {} prompt tokens in {:.2f} ms ({:.2f} T/s)\n\n',
       predictResult.n_eval,
+      totalCharacters,
       (predictResult.t_end_ms - predictResult.t_start_ms),
       1e3 /
           (predictResult.t_end_ms - predictResult.t_start_ms) *
@@ -111,6 +118,19 @@ void main(List<String> args) {
   // freeModel() will unload the model and release the memory it holds.
   params.dispose();
   llamaModel.freeModel();
+}
+
+// For now, callbacks are defined using pointers from the FFI packages
+// 'dart:ffi' and 'package:ffi/ffi.dart', which need to be imported for this
+// to work.
+//
+// This function should be able to be passed to LlamaModel.predictText and
+// it will be called when a new token is generated. Returning false here
+// would stop the prediction.
+bool onNewToken(Pointer<Char> tokenString) {
+  var dartToken = (tokenString as Pointer<Utf8>).toDartString();
+  stdout.write(dartToken);
+  return true;
 }
 
 ArgParser _buildArgParser() {

@@ -93,11 +93,17 @@ void main() {
     // case scenario of a whole context size with four bytes per utf-8.
     final outputText = calloc.allocate(contextSize * 4) as Pointer<Char>;
 
-    var predictResult = lib.wooly_predict(
-        params, loadedModel.ctx, loadedModel.model, false, outputText, nullptr);
+    // setup the callback test by zeroing the count and creating the cb pointer
+    globalCallbackCount = 0;
+    token_update_callback tokenUpdate =
+        Pointer.fromFunction(testCallback, false);
+
+    var predictResult = lib.wooly_predict(params, loadedModel.ctx,
+        loadedModel.model, false, outputText, nullptr, tokenUpdate);
 
     test('Text Prediction', () {
       expect(predictResult.result, 0);
+      expect(globalCallbackCount, 100);
     });
 
     // convert the predicted text back to a Dart string.
@@ -189,7 +195,7 @@ void main() {
       expect(params.antiprompt_count, equals(1));
     });
 
-    var (predictResult, outputString) = llamaModel.predictText(params);
+    var (predictResult, outputString) = llamaModel.predictText(params, nullptr);
 
     test('Text Prediction', () {
       expect(predictResult.result, 0);
@@ -212,12 +218,19 @@ void main() {
     // the use of the prompt cache and drop n_p_eval and t_p_eval_ms down to 0.
     params.seed = 1337;
 
-    var (predictResult2, outputString2) = llamaModel.predictText(params);
+    // do another callback test too with this run
+    globalCallbackCount = 0;
+    token_update_callback tokenUpdate =
+        Pointer.fromFunction(testCallback, false);
+
+    var (predictResult2, outputString2) =
+        llamaModel.predictText(params, tokenUpdate);
 
     test('Text Prediction', () {
       expect(predictResult2.result, 0);
       expect(predictResult2.n_p_eval, 0);
       expect(predictResult2.t_p_eval_ms, 0);
+      expect(globalCallbackCount, 100);
     });
 
     // Print out the generated text for fun as well as some stats on timing.
@@ -242,4 +255,14 @@ void main() {
       llamaModel.freeModel();
     });
   });
+}
+
+// maybe a terrible test, but it's at least something
+int globalCallbackCount = 0;
+
+bool testCallback(Pointer<Char> tokenString) {
+  //var dartToken = (tokenString as Pointer<Utf8>).toDartString();
+  //stdout.write(dartToken);
+  globalCallbackCount += 1;
+  return true;
 }

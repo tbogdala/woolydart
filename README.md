@@ -6,7 +6,7 @@ for further lower level access if desired.
 
 At present, it is in pre-alpha development and highly unstable. 
 
-Upstream llama.cpp is pinned to commit [abd894a](https://github.com/ggerganov/llama.cpp/commit/abd894ad96a242043b8e197ec130d8649eead22e).
+Upstream llama.cpp is pinned to commit [ABD894A](https://github.com/ggerganov/llama.cpp/commit/abd894ad96a242043b8e197ec130d8649eead22e)
 
 
 ## Build notes
@@ -55,6 +55,8 @@ Make sure to actually specify a GGUF file path so it can load the model for test
 
 * FFIGEN invoked as `dart run ffigen`, but that shouldn't need to be done by consumers of the library unless you're
   updating the `llama.cpp` bindings yourself.
+
+* Callbacks are probably not re-entrant and have not been tested for that use case.
 
 
 ### TODO

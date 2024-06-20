@@ -89,14 +89,20 @@ class LlamaModel {
     return lib.wooly_new_params();
   }
 
-  (wooly_predict_result, String?) predictText(gpt_params_simple params) {
+  // Runs text inferrence on the loaded model to predict text based on the set
+  // of parameters provided by `params`. An callback function can be supplied
+  // for `onNewToken` to provide a function that returns a bool as to whether
+  // or not prediction should continue at each new token being predicted; it
+  // can be set to `nullptr` if this feature is unneeded.
+  (wooly_predict_result, String?) predictText(
+      gpt_params_simple params, token_update_callback onNewToken) {
     // allocate the buffer for the predicted text. by default we just use the worst
     // case scenario of a whole context size with four bytes per utf-8.
     final outputText =
         calloc.allocate(_loadedContextLength * 4) as Pointer<Char>;
 
     var predictResult = lib.wooly_predict(
-        params, ctx, model, false, outputText, last_prompt_cache);
+        params, ctx, model, false, outputText, last_prompt_cache, onNewToken);
 
     String? outputString;
 
