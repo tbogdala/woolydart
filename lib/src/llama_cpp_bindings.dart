@@ -14691,6 +14691,8 @@ final class gpt_params_simple extends ffi.Struct {
 
   @ffi.Bool()
   external bool penalize_nl;
+
+  external ffi.Pointer<ffi.Char> grammar;
 }
 
 typedef token_update_callback

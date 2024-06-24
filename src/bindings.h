@@ -99,6 +99,8 @@ typedef struct gpt_params_simple {
     float       mirostat_eta;           // learning rate
     bool        penalize_nl;            // consider newlines as a repeatable token
 
+    const char* grammar;
+
 } gpt_params_simple;
 
 // the token update callback for wooly_redict should return a bool indicating if prediction should continue (true),

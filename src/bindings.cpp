@@ -696,13 +696,16 @@ LLAMA_API gpt_params_simple wooly_new_params()
     output.mirostat_tau = prototype.sparams.mirostat_tau;
     output.mirostat_eta = prototype.sparams.mirostat_eta;
     output.penalize_nl = prototype.sparams.penalize_nl;
-   
+    output.grammar = nullptr;
+
     return output;
 }
 
 void fill_gpt_params_from_simple(gpt_params_simple *simple, gpt_params *output)
 {
-    output->prompt = simple->prompt;
+    if (simple->prompt != nullptr) {
+        output->prompt = simple->prompt;
+    }
     if (simple->antiprompt_count > 0)
     {
         output->antiprompt = create_vector(simple->antiprompts, simple->antiprompt_count);
@@ -749,6 +752,8 @@ void fill_gpt_params_from_simple(gpt_params_simple *simple, gpt_params *output)
     output->sparams.mirostat_tau = simple->mirostat_tau;
     output->sparams.mirostat_eta = simple->mirostat_eta;
     output->sparams.penalize_nl = simple->penalize_nl;
-
+    if (simple->grammar != nullptr) {
+        output->sparams.grammar = simple->grammar;
+    }
 }
     

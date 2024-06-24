@@ -4,9 +4,17 @@ A Dart wrapper around the [llama.cpp library](https://github.com/ggerganov/llama
 API that provides enough functionality to be versatile, but also exposes the raw llama.cpp C callable functions
 for further lower level access if desired.
 
-At present, it is in pre-alpha development and highly unstable. 
+At present, it is in pre-alpha development and the API is unstable. 
 
 Upstream llama.cpp is pinned to commit [ABD894A](https://github.com/ggerganov/llama.cpp/commit/abd894ad96a242043b8e197ec130d8649eead22e)
+
+
+## Features
+
+* Simple high-level Dart class to use for text generation (`LlamaModel`); low-level llama.cpp functions are exposed for those that need more.
+* Basic samplers of llama.cpp, including: temp, top-k, top-p, min-p, tail free sampling, locally typical sampling, mirostat.
+* Support for llama.cpp's BNF-like grammar rules fro sampling.
+* Ability to cache the processed prompt data in memory so that it can be reused to speed up regeneration using the exact same prompt.
 
 
 ## Build notes
@@ -61,4 +69,6 @@ Make sure to actually specify a GGUF file path so it can load the model for test
 
 ### TODO
 
-* Reenable some advanced sampling features again like grammar and logit biases.
+* Reenable some advanced sampling features again like logit biases.
+* Missing calls to just tokenize text and to pull embeddings out from text.
+* Maybe a dynamic LoRA layer, trained every time enough tokens fill up the context space, approx.

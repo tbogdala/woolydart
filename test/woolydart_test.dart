@@ -46,7 +46,6 @@ void main() {
     params.top_k = 1;
     params.top_p = 1.0;
     params.min_p = 0.1;
-    params.min_p = 0.1;
     params.penalty_repeat = 1.1;
     params.penalty_last_n = 512;
     params.ignore_eos = false;
@@ -175,7 +174,6 @@ void main() {
     params.top_k = 1;
     params.top_p = 1.0;
     params.min_p = 0.1;
-    params.min_p = 0.1;
     params.penalty_repeat = 1.1;
     params.penalty_last_n = 512;
     params.ignore_eos = false;
@@ -248,6 +246,89 @@ void main() {
           predictResult2.t_p_eval_ms,
           1e3 / predictResult2.t_p_eval_ms * predictResult2.n_p_eval),
     );
+
+    // free the allocated memory
+    tearDownAll(() {
+      params.dispose();
+      llamaModel.freeModel();
+    });
+  });
+
+  /****************************************************************************/
+  // Managed class grammar test
+
+  group('Fancy bindings gramar test', () {
+    const libFilepath = "src/llama.cpp/build/libllama.dylib";
+    var llamaModel = LlamaModel(libFilepath);
+
+    final modelFilepath = Platform.environment['WOOLY_TEST_MODEL_FILE'];
+    if (modelFilepath == null) {
+      print(
+          'Set WOOLY_TEST_MODEL_FILE environment variable to the gguf file to use for testing');
+      return;
+    }
+
+    final modelParams = llamaModel.getDefaultModelParams();
+    modelParams.n_gpu_layers = 100;
+    final contextParams = llamaModel.getDefaultContextParams();
+    contextParams.seed = -1;
+    contextParams.n_ctx = 0;
+
+    final loadedResult =
+        llamaModel.loadModel(modelFilepath, modelParams, contextParams, true);
+
+    test('Model load test', () {
+      expect(loadedResult, true);
+      expect(llamaModel.model, isNotNull);
+      expect(llamaModel.ctx, isNotNull);
+    });
+
+    final params = llamaModel.getTextGenParams();
+    params.n_predict = -1;
+    params.temp = 1.4;
+    params.top_k = 40;
+    params.top_p = 1.0;
+    params.min_p = 0.05;
+    params.penalty_repeat = 1.1;
+    params.penalty_last_n = 512;
+    params.flash_attn = true;
+    params.n_batch = 128;
+    params.setPrompt(
+        "<|user|>\nReturn a JSON object that describes an object in a fictional Dark Souls game. The returned JSON object should have 'Title' and 'Description' fields that define the item in the game. Make sure to write the item lore in the style of Fromsoft and thier Dark Souls series of games: there should be over-the-top naming of fantastically gross monsters and tragic historical events from the world, all with a very nihilistic feel.<|end|>\n<|assistant|>\n");
+    params.setAntiprompts([
+      "<|end|>",
+    ]);
+
+    // now we load the grammar from the llama.cpp project
+    File grammarFile = File('src/llama.cpp/grammars/json.gbnf');
+    String grammarRules = grammarFile.readAsStringSync();
+    params.setGrammar(grammarRules);
+
+    test('Parameter creation test', () {
+      expect(params, isNotNull);
+      expect(params.prompt, isNotNull);
+      expect(params.antiprompts, isNotNull);
+      expect(params.antiprompt_count, equals(1));
+    });
+
+    var (predictResult, outputString) = llamaModel.predictText(params, nullptr);
+
+    test('Text Prediction', () {
+      expect(predictResult.result, 0);
+    });
+
+    // Print out the generated text for fun as well as some stats on timing.
+    print(format('Generated text:\n{}', outputString ?? "<failed prediction>"));
+    print(format(
+        '\nTiming Data: {} tokens total in {:.2f} ms ({:.2f} T/s) ; {} prompt tokens in {:.2f} ms ({:.2f} T/s)\n\n',
+        predictResult.n_eval,
+        (predictResult.t_end_ms - predictResult.t_start_ms),
+        1e3 /
+            (predictResult.t_end_ms - predictResult.t_start_ms) *
+            predictResult.n_eval,
+        predictResult.n_p_eval,
+        predictResult.t_p_eval_ms,
+        1e3 / predictResult.t_p_eval_ms * predictResult.n_p_eval));
 
     // free the allocated memory
     tearDownAll(() {

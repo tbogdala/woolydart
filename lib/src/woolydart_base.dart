@@ -13,7 +13,7 @@ class LlamaModel {
   Pointer<llama_model> model = nullptr;
 
   // internal handle to prompt cache from last prediction
-  Pointer<Void> last_prompt_cache = nullptr;
+  Pointer<Void> lastPromptCache = nullptr;
 
   // the size of the context used to load the model
   int _loadedContextLength = 0;
@@ -53,15 +53,15 @@ class LlamaModel {
 
     model = loadedModel.model;
     ctx = loadedModel.ctx;
-    last_prompt_cache = nullptr;
+    lastPromptCache = nullptr;
     _loadedContextLength = lib.llama_n_ctx(ctx);
     return true;
   }
 
   void freeModel() {
     lib.wooly_free_model(ctx, model);
-    if (last_prompt_cache != nullptr) {
-      lib.wooly_free_prompt_cache(last_prompt_cache);
+    if (lastPromptCache != nullptr) {
+      lib.wooly_free_prompt_cache(lastPromptCache);
     }
     ctx = nullptr;
     model = nullptr;
@@ -102,7 +102,7 @@ class LlamaModel {
         calloc.allocate(_loadedContextLength * 4) as Pointer<Char>;
 
     var predictResult = lib.wooly_predict(
-        params, ctx, model, false, outputText, last_prompt_cache, onNewToken);
+        params, ctx, model, false, outputText, lastPromptCache, onNewToken);
 
     String? outputString;
 
@@ -110,7 +110,7 @@ class LlamaModel {
     if (predictResult.result == 0) {
       outputString = (outputText as Pointer<Utf8>).toDartString();
       if (params.prompt_cache_all) {
-        last_prompt_cache = predictResult.prompt_cache;
+        lastPromptCache = predictResult.prompt_cache;
       } else {
         lib.wooly_free_prompt_cache(predictResult.prompt_cache);
       }
@@ -127,6 +127,7 @@ extension GptParamsSimpleExtension on gpt_params_simple {
   void dispose() {
     freePrompt();
     freeAntiprompts();
+    freeGrammar();
   }
 
   // Frees the memory used by the prompt native string.
@@ -142,10 +143,27 @@ extension GptParamsSimpleExtension on gpt_params_simple {
   void setPrompt(String newPrompt) {
     // if we already had a native prompt string, free it.
     if (prompt != nullptr) {
-      malloc.free(prompt);
-      prompt = nullptr;
+      freePrompt();
     }
     prompt = newPrompt.toNativeUtf8() as Pointer<Char>;
+  }
+
+  // Frees the memory used by the grammar native string.
+  void freeGrammar() {
+    if (grammar != nullptr) {
+      malloc.free(grammar);
+      grammar = nullptr;
+    }
+  }
+
+  // Sets the grammar string, using llama.cpp's BNF-like syntax to constrain output,
+  // for the parameters taking care of the conversation to a C compatible
+  // character array.
+  void setGrammar(String newGrammar) {
+    if (grammar != nullptr) {
+      freeGrammar();
+    }
+    grammar = newGrammar.toNativeUtf8() as Pointer<Char>;
   }
 
   // Frees the memory used by the antiprompt native strings
