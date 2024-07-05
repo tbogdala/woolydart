@@ -12,7 +12,7 @@ void main(List<String> args) {
 
   // load the library up for ffi work; the actual filepath
   // depends on the operating system's perference for libraries.
-  const libFilepath = "src/llama.cpp/build/libllama.dylib";
+  const libFilepath = "src/build/libwoolydart.dylib";
   var llamaModel = LlamaModel(libFilepath);
 
   // setup the model parameters which has options to control
@@ -48,6 +48,8 @@ void main(List<String> args) {
     print('\nFailed to load the model successfully.');
     print(
         'Ensure you selected the right GGUF file and that you have the options set correctly.');
+    print(
+        'Additionally, try running this example without the "quiet" flag for more information.');
   }
 
   // now we build _another_ structure, this one a simplified form of gpt_params

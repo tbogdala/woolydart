@@ -6,39 +6,33 @@ for further lower level access if desired.
 
 At present, it is in pre-alpha development and the API is unstable. 
 
-Upstream llama.cpp is pinned to commit [ABD894A](https://github.com/ggerganov/llama.cpp/commit/abd894ad96a242043b8e197ec130d8649eead22e)
+Upstream llama.cpp is pinned to tag [b3324](https://github.com/ggerganov/llama.cpp/commit/c8771ab5f89387cdd7d9a8a69280dac46b45e02f).
+
+
+## License
+
+MIT licensed, like the core upstream `llama.cpp` it wraps. See `LICENSE` for details.
 
 
 ## Features
 
 * Simple high-level Dart class to use for text generation (`LlamaModel`); low-level llama.cpp functions are exposed for those that need more.
 * Basic samplers of llama.cpp, including: temp, top-k, top-p, min-p, tail free sampling, locally typical sampling, mirostat.
-* Support for llama.cpp's BNF-like grammar rules fro sampling.
+* Support for llama.cpp's BNF-like grammar rules for sampling.
 * Ability to cache the processed prompt data in memory so that it can be reused to speed up regeneration using the exact same prompt.
 
 
 ## Build notes
 
-`llama.cpp` is now a submodule in `./src` and will need to be pulled and updated with `--recurse-submodules`.
-
-Before building the upstream project, run the patch to include the custom bindings:
+To build the version of upstream llama.cpp that has woolydart's binding code in it, use the following commands.
 
 ```bash
-cd src/llama.cpp
-git apply ../llamacpp_patch.patch
+cd src
+cmake -B build
+cmake --build build --config Release
 ```
 
-Built MacOs with the following commands:
-
-```bash
-cd src/llama.cpp
-cmake -B build -DLLAMA_STATIC=Off -DBUILD_SHARED_LIBS=On -DLLAMA_BUILD_TESTS=Off -DLLAMA_BUILD_EXAMPLES=Off -DLLAMA_METAL_EMBED_LIBRARY=On
-cd build
-make build_info
-cmake --build . --config Release
-```
-
-Once the upstream `llama.cpp` libraries have been built, the Dart wrappers should function. You can run the
+Once the custom library with `llama.cpp` code and the custom bindings code has been built, the Dart wrappers should function. You can run the
 tests by using the following command:
 
 ```bash
@@ -65,6 +59,9 @@ Make sure to actually specify a GGUF file path so it can load the model for test
   updating the `llama.cpp` bindings yourself.
 
 * Callbacks are probably not re-entrant and have not been tested for that use case.
+
+* `llama.cpp` is now a submodule in `./src` and will need to be pulled and updated with `--recurse-submodules` if upgrading the 
+pinned version.
 
 
 ### TODO

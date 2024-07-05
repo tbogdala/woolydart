@@ -9,7 +9,7 @@ import 'package:woolydart/woolydart.dart';
 
 void main() {
   group('Raw binding tests', () {
-    const dylibPath = "src/llama.cpp/build/libllama.dylib";
+    const dylibPath = "src/build/libwoolydart.dylib";
     final lib = woolydart(DynamicLibrary.open(dylibPath));
 
     final modelFilepath = Platform.environment['WOOLY_TEST_MODEL_FILE'];
@@ -34,6 +34,11 @@ void main() {
       expect(loadedModel.model, isNotNull);
       expect(loadedModel.ctx, isNotNull);
     });
+
+    if (loadedModel.model == nullptr || loadedModel.ctx == nullptr) {
+      throw Exception(
+          'Failed to load the model file for testing! Test aborted.');
+    }
 
     final params = lib.wooly_new_params();
     params.prompt =
@@ -141,7 +146,7 @@ void main() {
   // Managed classes tests
 
   group('Fancy bindings tests', () {
-    const libFilepath = "src/llama.cpp/build/libllama.dylib";
+    const libFilepath = "src/build/libwoolydart.dylib";
     var llamaModel = LlamaModel(libFilepath);
 
     final modelFilepath = Platform.environment['WOOLY_TEST_MODEL_FILE'];
@@ -160,11 +165,18 @@ void main() {
     final loadedResult =
         llamaModel.loadModel(modelFilepath, modelParams, contextParams, true);
 
+    final checkIsLoaded = llamaModel.isModelLoaded();
+
     test('Model load test', () {
       expect(loadedResult, true);
+      expect(checkIsLoaded, true);
       expect(llamaModel.model, isNotNull);
       expect(llamaModel.ctx, isNotNull);
     });
+
+    if (loadedResult == false || checkIsLoaded == false) {
+      throw Exception('Failed to load the test model! Test aborted.');
+    }
 
     final params = llamaModel.getTextGenParams();
     params.seed = 42;
@@ -258,7 +270,7 @@ void main() {
   // Managed class grammar test
 
   group('Fancy bindings gramar test', () {
-    const libFilepath = "src/llama.cpp/build/libllama.dylib";
+    const libFilepath = "src/build/libwoolydart.dylib";
     var llamaModel = LlamaModel(libFilepath);
 
     final modelFilepath = Platform.environment['WOOLY_TEST_MODEL_FILE'];
@@ -282,6 +294,10 @@ void main() {
       expect(llamaModel.model, isNotNull);
       expect(llamaModel.ctx, isNotNull);
     });
+
+    if (loadedResult == false) {
+      throw Exception('Failed to load the test model! Test aborted.');
+    }
 
     final params = llamaModel.getTextGenParams();
     params.n_predict = -1;

@@ -20,9 +20,6 @@ ffigen:
   name: 'woolydart'
   description: 'llama.cpp binding'
   output: 'lib/src/llama_cpp_bindings.dart'
-  llvm-path:
-    - '/opt/homebrew/opt/llvm'
-  ignore-source-errors: true
   headers:
     entry-points:
       - 'src/bindings.h'

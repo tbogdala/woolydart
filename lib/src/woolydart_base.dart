@@ -58,6 +58,7 @@ class LlamaModel {
     return true;
   }
 
+  // Unloads the model completely.
   void freeModel() {
     lib.wooly_free_model(ctx, model);
     if (lastPromptCache != nullptr) {
@@ -66,6 +67,15 @@ class LlamaModel {
     ctx = nullptr;
     model = nullptr;
     _loadedContextLength = 0;
+  }
+
+  // Returns true if a model is currently loaded, false otherwise.
+  bool isModelLoaded() {
+    if (model != nullptr && ctx != nullptr) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   // Gets a default copy of the context parameters using default settings from

@@ -11792,6 +11792,23 @@ class woolydart {
   late final _llama_n_threads_batch = _llama_n_threads_batchPtr
       .asFunction<int Function(ffi.Pointer<llama_context>)>();
 
+  void llama_set_embeddings(
+    ffi.Pointer<llama_context> ctx,
+    bool embeddings,
+  ) {
+    return _llama_set_embeddings(
+      ctx,
+      embeddings,
+    );
+  }
+
+  late final _llama_set_embeddingsPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Void Function(
+              ffi.Pointer<llama_context>, ffi.Bool)>>('llama_set_embeddings');
+  late final _llama_set_embeddings = _llama_set_embeddingsPtr
+      .asFunction<void Function(ffi.Pointer<llama_context>, bool)>();
+
   void llama_set_causal_attn(
     ffi.Pointer<llama_context> ctx,
     bool causal_attn,
@@ -12082,6 +12099,20 @@ class woolydart {
   late final _llama_token_nl =
       _llama_token_nlPtr.asFunction<int Function(ffi.Pointer<llama_model>)>();
 
+  int llama_token_pad(
+    ffi.Pointer<llama_model> model,
+  ) {
+    return _llama_token_pad(
+      model,
+    );
+  }
+
+  late final _llama_token_padPtr = _lookup<
+          ffi.NativeFunction<llama_token Function(ffi.Pointer<llama_model>)>>(
+      'llama_token_pad');
+  late final _llama_token_pad =
+      _llama_token_padPtr.asFunction<int Function(ffi.Pointer<llama_model>)>();
+
   int llama_add_bos_token(
     ffi.Pointer<llama_model> model,
   ) {
@@ -12285,6 +12316,12 @@ class woolydart {
               ffi.Pointer<ffi.Char>,
               int)>();
 
+  /// Initialize a llama_grammar.
+  ///
+  /// @param rules The rule elements of the grammar to initialize.
+  /// @param n_rules The number of rules.
+  /// @param start_rule_index The index of the root rule (the starting point of the grammar).
+  /// @return The initialized llama_grammar or nullptr if initialization failed.
   ffi.Pointer<llama_grammar> llama_grammar_init(
     ffi.Pointer<ffi.Pointer<llama_grammar_element>> rules,
     int n_rules,
@@ -13462,15 +13499,6 @@ final class ggml_tensor extends ffi.Struct {
   @ffi.Array.multi([10])
   external ffi.Array<ffi.Pointer<ggml_tensor>> src;
 
-  @ffi.Int()
-  external int perf_runs;
-
-  @ffi.Int64()
-  external int perf_cycles;
-
-  @ffi.Int64()
-  external int perf_time_us;
-
   external ffi.Pointer<ggml_tensor> view_src;
 
   @ffi.Size()
@@ -13482,9 +13510,6 @@ final class ggml_tensor extends ffi.Struct {
   external ffi.Array<ffi.Char> name;
 
   external ffi.Pointer<ffi.Void> extra;
-
-  @ffi.Array.multi([8])
-  external ffi.Array<ffi.Char> padding;
 }
 
 final class ggml_backend_buffer extends ffi.Opaque {}
@@ -13543,15 +13568,6 @@ final class ggml_cgraph extends ffi.Struct {
 
   @ffi.Int32()
   external int order;
-
-  @ffi.Int()
-  external int perf_runs;
-
-  @ffi.Int64()
-  external int perf_cycles;
-
-  @ffi.Int64()
-  external int perf_time_us;
 }
 
 final class ggml_scratch extends ffi.Struct {
@@ -13572,28 +13588,6 @@ final class ggml_init_params extends ffi.Struct {
 
   @ffi.Bool()
   external bool no_alloc;
-}
-
-abstract class ggml_task_type {
-  static const int GGML_TASK_TYPE_INIT = 0;
-  static const int GGML_TASK_TYPE_COMPUTE = 1;
-  static const int GGML_TASK_TYPE_FINALIZE = 2;
-}
-
-final class ggml_compute_params extends ffi.Struct {
-  @ffi.Int32()
-  external int type;
-
-  @ffi.Int()
-  external int ith;
-
-  @ffi.Int()
-  external int nth;
-
-  @ffi.Size()
-  external int wsize;
-
-  external ffi.Pointer<ffi.Void> wdata;
 }
 
 abstract class ggml_numa_strategy {
@@ -14089,6 +14083,7 @@ abstract class llama_vocab_type {
   static const int LLAMA_VOCAB_TYPE_SPM = 1;
   static const int LLAMA_VOCAB_TYPE_BPE = 2;
   static const int LLAMA_VOCAB_TYPE_WPM = 3;
+  static const int LLAMA_VOCAB_TYPE_UGM = 4;
 }
 
 abstract class llama_vocab_pre_type {
@@ -14189,6 +14184,7 @@ abstract class llama_pooling_type {
   static const int LLAMA_POOLING_TYPE_NONE = 0;
   static const int LLAMA_POOLING_TYPE_MEAN = 1;
   static const int LLAMA_POOLING_TYPE_CLS = 2;
+  static const int LLAMA_POOLING_TYPE_LAST = 3;
 }
 
 abstract class llama_split_mode {

@@ -86,7 +86,14 @@ load_model_result wooly_load_model(
     try
     {
         model = llama_load_model_from_file(fname, model_params);
+        if (model == NULL) {
+            return res;
+        }
 	    lctx = llama_new_context_with_model(model, context_params);
+        if (lctx == NULL) {
+            llama_free_model(model);
+            return res;
+        }
     }
     catch (std::runtime_error &e)
     {
