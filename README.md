@@ -32,6 +32,11 @@ cmake -B build
 cmake --build build --config Release
 ```
 
+For the Apple crowd, if you want Metal support with an embedded shader library for ease of distribution, you'll need to
+add the appropriate flags:
+
+`cmake -B build -DLLAMA_METAL=On -DLLAMA_METAL_EMBED_LIBRARY=On`
+
 Once the custom library with `llama.cpp` code and the custom bindings code has been built, the Dart wrappers should function. You can run the
 tests by using the following command:
 

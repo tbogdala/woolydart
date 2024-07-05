@@ -5,11 +5,6 @@ set(LLAMA_BUILD_TESTS Off)
 set(LLAMA_BUILD_EXAMPLES Off)
 set(LLAMA_BUILD_SERVER Off)
 
-if(APPLE)
-    set(LLAMA_METAL On)
-    set(LLAMA_METAL_EMBED_LIBRARY On)
-endif()
-
 # include upstream llamacpp options
 add_subdirectory("llama.cpp")
 
