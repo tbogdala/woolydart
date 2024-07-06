@@ -6,7 +6,8 @@ for further lower level access if desired.
 
 At present, it is in pre-alpha development and the API is unstable. 
 
-Upstream llama.cpp is pinned to tag [b3324](https://github.com/ggerganov/llama.cpp/commit/c8771ab5f89387cdd7d9a8a69280dac46b45e02f).
+Upstream llama.cpp is pinned to commit [d7fd29f](https://github.com/ggerganov/llama.cpp/commit/d7fd29fff16456ce9c3a23fd2d09a66256b05aff)
+from July 04, 2024.
 
 
 ## License
@@ -35,7 +36,9 @@ cmake --build build --config Release
 For the Apple crowd, if you want Metal support with an embedded shader library for ease of distribution, you'll need to
 add the appropriate flags:
 
-`cmake -B build -DLLAMA_METAL=On -DLLAMA_METAL_EMBED_LIBRARY=On`
+```bash
+cmake -B build -DLLAMA_METAL=On -DLLAMA_METAL_EMBED_LIBRARY=On
+```
 
 Once the custom library with `llama.cpp` code and the custom bindings code has been built, the Dart wrappers should function. You can run the
 tests by using the following command:

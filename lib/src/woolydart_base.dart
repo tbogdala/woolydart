@@ -19,7 +19,7 @@ class LlamaModel {
   int _loadedContextLength = 0;
 
   // Construct a new LlamaModel wrapper for llama.cpp by giving it a filepath
-  // to the compiled library. On Android, this might be 'libllama.so'. On iOS
+  // to the compiled library. On Android, this might be 'libwoolydart.so'. On iOS
   // this might be empty, ''. If the libFilepath parameter is empty, then it will
   // attempt to just use the active process instead of another library file.
   // On desktop, this might be a full version to the compiled binary,
