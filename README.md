@@ -9,6 +9,7 @@ At present, it is in pre-alpha development and the API is unstable.
 Upstream llama.cpp is pinned to commit [d7fd29f](https://github.com/ggerganov/llama.cpp/commit/d7fd29fff16456ce9c3a23fd2d09a66256b05aff)
 from July 04, 2024.
 
+Supported Operating Systems: MacOS, iOS, Android (more to come!)
 
 ## License
 
