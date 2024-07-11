@@ -84,9 +84,27 @@ dart example/rag_summarize.dart -m ~/.cache/lm-studio/models/bartowski/Phi-3.1-m
 This generates the following output:
 
 ```
- William Anthony "The Refrigerator" Perry, born December 16, 1962 in Aiken, South Carolina, was a renowned NFL defensive tackle who played for the Chicago Bears and Clemson Tigers. He earned the nickname "Refrigerator" due to his massive size during college football at Clemson University, where he also received the ACC Player of the Year award. Drafted in 1985 by the Bears, Perry gained fame as part of their first Super Bowl-winning team, setting a record for the heaviest player to score a touchdown in the Super Bowl and possessing the largest Super Bowl ring. Despite facing challenges with his weight throughout his professional career, he played 10 seasons and became an iconic figure among Bears fans. Perry's off-field ventures included music collaborations with Walter Payton and media appearances, including a notable boxing match against Bob Sapp. After retiring from football in 1994, he faced personal struggles, losing over one hundred pounds before regaining much of his weight. His health issues continued to affect him later on, leading to hospitalization for diabetes treatment and hearing loss. Perry's life post-football has been marked by various ups and downs, including a brief comeback attempt in the World League of American Football and an induction into the WWE Hall of Fame. He also faced legal disputes over his Super Bowl ring, which was later auctioned for $200,000. Perry's legacy is remembered not just for his athletic achievements but also for his larger-than-life personality off the field.
+ William Anthony "The Refrigerator" Perry, born December 16, 1962 in Aiken, South Carolina, 
+ was a renowned NFL defensive tackle who played for the Chicago Bears and Clemson Tigers. 
+ He earned the nickname "Refrigerator" due to his massive size during college football at 
+ Clemson University, where he also received the ACC Player of the Year award. Drafted in 
+ 1985 by the Bears, Perry gained fame as part of their first Super Bowl-winning team, 
+ setting a record for the heaviest player to score a touchdown in the Super Bowl and 
+ possessing the largest Super Bowl ring. Despite facing challenges with his weight 
+ throughout his professional career, he played 10 seasons and became an iconic figure among
+ Bears fans. Perry's off-field ventures included music collaborations with Walter Payton 
+ and media appearances, including a notable boxing match against Bob Sapp. After retiring 
+ from football in 1994, he faced personal struggles, losing over one hundred pounds before 
+ regaining much of his weight. His health issues continued to affect him later on, leading 
+ to hospitalization for diabetes treatment and hearing loss. Perry's life post-football has 
+ been marked by various ups and downs, including a brief comeback attempt in the World 
+ League of American Football and an induction into the WWE Hall of Fame. He also faced 
+ legal disputes over his Super Bowl ring, which was later auctioned for $200,000. Perry's 
+ legacy is remembered not just for his athletic achievements but also for his 
+ larger-than-life personality off the field.
 
-Performance data: 358 tokens (1529 characters) total in 371565.63 ms (0.96 T/s) ; 26962 prompt tokens in 289057.38 ms (93.28 T/s)
+Performance data: 358 tokens (1529 characters) total in 371565.63 ms (0.96 T/s) ; 
+26962 prompt tokens in 289057.38 ms (93.28 T/s)
 ```
 
 For a fun time on MacOS, you can configure `Accessibility > Spoken Content` in the `System Settings` app to have the 
