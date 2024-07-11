@@ -51,6 +51,8 @@ dart test
 
 ## Examples
 
+### Basic Text Generation
+
 The basic example can be run with the following command (use `--help` to see all command-line arguments):
 
 ```bash
@@ -58,6 +60,42 @@ dart examples/basic_example.dart -m <GGUF file path>
 ```
 
 Make sure to actually specify a GGUF file path so it can load the model for testing.
+
+### Simple RAG Summarization
+
+This is a simple sample that will load the content from the provided URL on the command line, run it
+through an optional *readability* pass, and then pass it to the LLM for summarization.
+
+Note: There's a git submodule in `./src` called `libreadability` which wraps a Rust library called
+[readability.rs](https://github.com/readable-app/readability.rs). This library cleans out some 
+unneeded portions of the retrieved HTML so that we can pass less text to the LLM. To build this,
+you will need a Rust toolchain installed and then issue the following command from this project's root
+folder: `cd src/libreadability;cargo build --release` ... this sample will still run if you don't build
+it, but you'll get a warning message and more text will get passed to the LLM.
+
+Currently there is no chunking strategy to this example so you will have to fit the whole HTML document
+(reduced with `libreadability`) into the context. You can specify the context size with the `-c` parameter.
+ On my MacBook Air M3 with 24 GB of memory, I can run the following sample command:
+
+```bash
+dart example/rag_summarize.dart -m ~/.cache/lm-studio/models/bartowski/Phi-3.1-mini-128k-instruct-GGUF/Phi-3.1-mini-128k-instruct-Q4_K_M.gguf --url "https://en.wikipedia.org/wiki/William_Perry_(American_football)" -c 28000
+```
+
+This generates the following output:
+
+```
+ William Anthony "The Refrigerator" Perry, born December 16, 1962 in Aiken, South Carolina, was a renowned NFL defensive tackle who played for the Chicago Bears and Clemson Tigers. He earned the nickname "Refrigerator" due to his massive size during college football at Clemson University, where he also received the ACC Player of the Year award. Drafted in 1985 by the Bears, Perry gained fame as part of their first Super Bowl-winning team, setting a record for the heaviest player to score a touchdown in the Super Bowl and possessing the largest Super Bowl ring. Despite facing challenges with his weight throughout his professional career, he played 10 seasons and became an iconic figure among Bears fans. Perry's off-field ventures included music collaborations with Walter Payton and media appearances, including a notable boxing match against Bob Sapp. After retiring from football in 1994, he faced personal struggles, losing over one hundred pounds before regaining much of his weight. His health issues continued to affect him later on, leading to hospitalization for diabetes treatment and hearing loss. Perry's life post-football has been marked by various ups and downs, including a brief comeback attempt in the World League of American Football and an induction into the WWE Hall of Fame. He also faced legal disputes over his Super Bowl ring, which was later auctioned for $200,000. Perry's legacy is remembered not just for his athletic achievements but also for his larger-than-life personality off the field.
+
+Performance data: 358 tokens (1529 characters) total in 371565.63 ms (0.96 T/s) ; 26962 prompt tokens in 289057.38 ms (93.28 T/s)
+```
+
+For a fun time on MacOS, you can configure `Accessibility > Spoken Content` in the `System Settings` app to have the 
+system voice you want, and then re-run the above example but quiet `llama.cpp`'s output and then pipe the generated
+text to `say`.
+
+```bash
+dart example/rag_summarize.dart -m ~/.cache/lm-studio/models/bartowski/Phi-3.1-mini-128k-instruct-GGUF/Phi-3.1-mini-128k-instruct-Q4_K_M.gguf --url "https://en.wikipedia.org/wiki/William_Perry_(American_football)" -c 28000 -q | say
+```
 
 
 ### Developer Notes
