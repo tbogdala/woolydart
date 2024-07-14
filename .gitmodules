@@ -1,3 +1,6 @@
 [submodule "src/libreadability"]
 	path = src/libreadability
 	url = https://github.com/tbogdala/libreadability.git
+[submodule "src/woolycore"]
+	path = src/woolycore
+	url = https://github.com/tbogdala/woolycore.git
