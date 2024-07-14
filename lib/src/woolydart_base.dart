@@ -1,19 +1,19 @@
 import 'dart:ffi';
 
 import 'package:ffi/ffi.dart';
-import 'package:woolydart/woolydart.dart';
+import 'package:woolydart/src/llama_cpp_bindings.dart';
 
 class LlamaModel {
   late woolydart lib;
 
   // internal handle to the context
-  Pointer<llama_context> ctx = nullptr;
+  Pointer<Void> _ctx = nullptr;
 
   // internal handle to the loaded model
-  Pointer<llama_model> model = nullptr;
+  Pointer<Void> _model = nullptr;
 
   // internal handle to prompt cache from last prediction
-  Pointer<Void> lastPromptCache = nullptr;
+  Pointer<Void> _lastPromptCache = nullptr;
 
   // the size of the context used to load the model
   int _loadedContextLength = 0;
@@ -38,40 +38,45 @@ class LlamaModel {
   // disable all of the information that upstream llama.cpp writes to output streams.
   //
   // Should the process fail, false is returned.
-  bool loadModel(String modelFile, llama_model_params modelParams,
-      llama_context_params contextParams, bool silenceLlamaCpp) {
-    var nativeModelPath = modelFile.toNativeUtf8();
+  bool loadModel(String modelFile, wooly_llama_model_params modelParams,
+      wooly_llama_context_params contextParams, bool silenceLlamaCpp) {
+    // if we have a cached prompt or a loaded model, we free the memory now
+    if (_lastPromptCache != nullptr || _model != nullptr || _ctx != nullptr) {
+      freeModel();
+    }
 
+    var nativeModelPath = modelFile.toNativeUtf8();
     var loadedModel = lib.wooly_load_model(nativeModelPath as Pointer<Char>,
         modelParams, contextParams, silenceLlamaCpp);
-
     malloc.free(nativeModelPath);
 
     if (loadedModel.ctx == nullptr || loadedModel.model == nullptr) {
       return false;
     }
 
-    model = loadedModel.model;
-    ctx = loadedModel.ctx;
-    lastPromptCache = nullptr;
-    _loadedContextLength = lib.llama_n_ctx(ctx);
+    _model = loadedModel.model;
+    _ctx = loadedModel.ctx;
+    _lastPromptCache = nullptr;
+    _loadedContextLength = loadedModel.context_length;
+
     return true;
   }
 
   // Unloads the model completely.
   void freeModel() {
-    lib.wooly_free_model(ctx, model);
-    if (lastPromptCache != nullptr) {
-      lib.wooly_free_prompt_cache(lastPromptCache);
+    lib.wooly_free_model(_ctx, _model);
+    if (_lastPromptCache != nullptr) {
+      lib.wooly_free_prompt_cache(_lastPromptCache);
+      _lastPromptCache = nullptr;
     }
-    ctx = nullptr;
-    model = nullptr;
+    _ctx = nullptr;
+    _model = nullptr;
     _loadedContextLength = 0;
   }
 
   // Returns true if a model is currently loaded, false otherwise.
   bool isModelLoaded() {
-    if (model != nullptr && ctx != nullptr) {
+    if (_model != nullptr && _ctx != nullptr) {
       return true;
     } else {
       return false;
@@ -80,14 +85,14 @@ class LlamaModel {
 
   // Gets a default copy of the context parameters using default settings from
   // llama.cpp.
-  llama_context_params getDefaultContextParams() {
-    return lib.llama_context_default_params();
+  wooly_llama_context_params getDefaultContextParams() {
+    return lib.wooly_get_default_llama_context_params();
   }
 
   // Gets a default copy of the model parameters using default settings from
   // llama.cpp upstream.
-  llama_model_params getDefaultModelParams() {
-    return lib.llama_model_default_params();
+  wooly_llama_model_params getDefaultModelParams() {
+    return lib.wooly_get_default_llama_model_params();
   }
 
   // Gets a new copy of the parameters used to control text generation. Under
@@ -95,8 +100,8 @@ class LlamaModel {
   // llama.cpp's 'common.h' header, which has a bunch of c++ members that
   // cannot be bound with ffigen. A default copy of `gpt_params` is created
   // to pull initial values from.
-  gpt_params_simple getTextGenParams() {
-    return lib.wooly_new_params();
+  wooly_gpt_params getTextGenParams() {
+    return lib.wooly_new_gpt_params();
   }
 
   // Runs text inferrence on the loaded model to predict text based on the set
@@ -105,14 +110,14 @@ class LlamaModel {
   // or not prediction should continue at each new token being predicted; it
   // can be set to `nullptr` if this feature is unneeded.
   (wooly_predict_result, String?) predictText(
-      gpt_params_simple params, token_update_callback onNewToken) {
+      wooly_gpt_params params, wooly_token_update_callback onNewToken) {
     // allocate the buffer for the predicted text. by default we just use the worst
     // case scenario of a whole context size with four bytes per utf-8.
     final outputText =
         calloc.allocate(_loadedContextLength * 4) as Pointer<Char>;
 
     var predictResult = lib.wooly_predict(
-        params, ctx, model, false, outputText, lastPromptCache, onNewToken);
+        params, _ctx, _model, false, outputText, _lastPromptCache, onNewToken);
 
     String? outputString;
 
@@ -120,7 +125,7 @@ class LlamaModel {
     if (predictResult.result == 0) {
       outputString = (outputText as Pointer<Utf8>).toDartString();
       if (params.prompt_cache_all) {
-        lastPromptCache = predictResult.prompt_cache;
+        _lastPromptCache = predictResult.prompt_cache;
       } else {
         lib.wooly_free_prompt_cache(predictResult.prompt_cache);
       }
@@ -131,7 +136,7 @@ class LlamaModel {
   }
 }
 
-extension GptParamsSimpleExtension on gpt_params_simple {
+extension GptParamsSimpleExtension on wooly_gpt_params {
   // Frees the native strings used by the parameters and must be called
   // when the client code is done with the object to avoid memory leaks.
   void dispose() {

@@ -12,7 +12,7 @@ void main(List<String> args) {
 
   // load the library up for ffi work; the actual filepath
   // depends on the operating system's perference for libraries.
-  const libFilepath = "src/build/libwoolydart.dylib";
+  const libFilepath = "src/build/libwoolycore.dylib";
   var llamaModel = LlamaModel(libFilepath);
 
   // setup the model parameters which has options to control

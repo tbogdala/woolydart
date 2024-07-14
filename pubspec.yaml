@@ -1,7 +1,7 @@
 name: woolydart
-description: A llama.cpp wrapper for Dart that has a high-level wrapper with low-level functions exposed.
+description: A llama.cpp wrapper for Dart that has a high-level wrapper with low-level functions exposed. Built on top of `woolycore`.
 version: 0.1.0
-# repository: https://github.com/my_org/my_repo
+repository: https://github.com/tbogdala/woolydart
 
 environment:
   sdk: ^3.4.0
@@ -25,7 +25,16 @@ ffigen:
   output: 'lib/src/llama_cpp_bindings.dart'
   headers:
     entry-points:
-      - 'src/bindings.h'
-      - 'src/llama.cpp/llama.h'
+      - 'src/woolycore/bindings.h'
   compiler-opts:
-    - '-Isrc/llama.cpp/'
+    - '-Isrc/woolycore/'
+  exclude-all-by-default: true
+  functions:
+    include:
+      - 'wooly.*'
+  structs:
+    include:
+      - 'wooly.*'
+  typedefs:
+    include:
+      - 'wooly.*'

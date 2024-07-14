@@ -1,15 +1,13 @@
 # Woolydart
 
 A Dart wrapper around the [llama.cpp library](https://github.com/ggerganov/llama.cpp), aiming for a high-level
-API that provides enough functionality to be versatile, but also exposes the raw llama.cpp C callable functions
-for further lower level access if desired.
+API that provides enough functionality to be versatile and useful. The basic, higher-level C functions that this
+library builds upon are are provided by the [woolycore](https://github.com/tbogdala/woolycore) library.
 
 At present, it is in pre-alpha development and the API is unstable. 
 
-Upstream llama.cpp is pinned to commit [d7fd29f](https://github.com/ggerganov/llama.cpp/commit/d7fd29fff16456ce9c3a23fd2d09a66256b05aff)
-from July 04, 2024.
-
 Supported Operating Systems: MacOS, iOS, Android (more to come!)
+
 
 ## License
 
@@ -18,7 +16,7 @@ MIT licensed, like the core upstream `llama.cpp` it wraps. See `LICENSE` for det
 
 ## Features
 
-* Simple high-level Dart class to use for text generation (`LlamaModel`); low-level llama.cpp functions are exposed for those that need more.
+* Simple high-level Dart class to use for text generation (`LlamaModel`).
 * Basic samplers of llama.cpp, including: temp, top-k, top-p, min-p, tail free sampling, locally typical sampling, mirostat.
 * Support for llama.cpp's BNF-like grammar rules for sampling.
 * Ability to cache the processed prompt data in memory so that it can be reused to speed up regeneration using the exact same prompt.
@@ -26,25 +24,37 @@ MIT licensed, like the core upstream `llama.cpp` it wraps. See `LICENSE` for det
 
 ## Build notes
 
-To build the version of upstream llama.cpp that has woolydart's binding code in it, use the following commands.
+To use these bindings, the upstream `llama.cpp` support needs to be compiled. This is provided through the 
+[woolycore](https://github.com/tbogdala/woolycore) library. Further information can be found in that project's
+README file, but the basic build can be executed with the following commands:
 
 ```bash
 cd src
-cmake -B build
+cmake -B build woolycore
 cmake --build build --config Release
 ```
 
-For the Apple crowd, if you want Metal support with an embedded shader library for ease of distribution, you'll need to
-add the appropriate flags:
+This will generate the library files required so that the Dart wrapper can load them.
+
+
+## Git updates
+
+This project uses submodules for upstream projects so make sure to update with appropriate parameters:
 
 ```bash
-cmake -B build -DGGML_METAL=On -DGGML_METAL_EMBED_LIBRARY=On 
+git pull --recurse-submodules
 ```
 
-Once the custom library with `llama.cpp` code and the custom bindings code has been built, the Dart wrappers should function. You can run the
-tests by using the following command:
+
+## Tests
+
+Once `wollycore` has been built, the Dart wrappers should function. The unit tests require an environment variable
+(`WOOLY_TEST_MODEL_FILE`) to be set with the path to the GGUF file for the model to use during testing.
+
+You can run the tests by using the following command:
 
 ```bash
+export WOOLY_TEST_MODEL_FILE=models/example-llama-3-8b.gguf
 dart test
 ```
 
@@ -74,8 +84,10 @@ folder: `cd src/libreadability;cargo build --release` ... this sample will still
 it, but you'll get a warning message and more text will get passed to the LLM.
 
 Currently there is no chunking strategy to this example so you will have to fit the whole HTML document
-(reduced with `libreadability`) into the context. You can specify the context size with the `-c` parameter.
- On my MacBook Air M3 with 24 GB of memory, I can run the following sample command:
+(reduced with `libreadability` from 195,963 characters to 64,413 characters) into the context. 
+You can specify the context size with the `-c` parameter.
+
+On my MacBook Air M3 with 24 GB of memory, I can run the following sample command:
 
 ```bash
 dart example/rag_summarize.dart -m ~/.cache/lm-studio/models/bartowski/Phi-3.1-mini-128k-instruct-GGUF/Phi-3.1-mini-128k-instruct-Q4_K_M.gguf --url "https://en.wikipedia.org/wiki/William_Perry_(American_football)" -c 28000
@@ -121,16 +133,6 @@ dart example/rag_summarize.dart -m ~/.cache/lm-studio/models/bartowski/Phi-3.1-m
 * MacOS needed `brew install llvm` to run this, I believe.
 
 * FFIGEN invoked as `dart run ffigen`, but that shouldn't need to be done by consumers of the library unless you're
-  updating the `llama.cpp` bindings yourself.
+  updating the `woolycore` bindings yourself.
 
 * Callbacks are probably not re-entrant and have not been tested for that use case.
-
-* `llama.cpp` is now a submodule in `./src` and will need to be pulled and updated with `--recurse-submodules` if upgrading the 
-pinned version.
-
-
-### TODO
-
-* Reenable some advanced sampling features again like logit biases.
-* Missing calls to just tokenize text and to pull embeddings out from text.
-* Maybe a dynamic LoRA layer, trained every time enough tokens fill up the context space, approx.

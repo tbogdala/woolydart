@@ -1,3 +1,3 @@
-## 1.0.0
+## 0.1.0
 
-- Initial version.
+- Initial development version. Versioning hasn't started yet and all progress is on the `main` branch.

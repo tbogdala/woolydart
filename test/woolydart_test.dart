@@ -9,7 +9,7 @@ import 'package:woolydart/woolydart.dart';
 
 void main() {
   group('Raw binding tests', () {
-    const dylibPath = "src/build/libwoolydart.dylib";
+    const dylibPath = "src/build/libwoolycore.dylib";
     final lib = woolydart(DynamicLibrary.open(dylibPath));
 
     final modelFilepath = Platform.environment['WOOLY_TEST_MODEL_FILE'];
@@ -20,10 +20,10 @@ void main() {
     }
     var modelPath = modelFilepath.toNativeUtf8();
 
-    var modelParams = lib.llama_model_default_params();
+    var modelParams = lib.wooly_get_default_llama_model_params();
     modelParams.n_gpu_layers = 100;
 
-    var contextParams = lib.llama_context_default_params();
+    var contextParams = lib.wooly_get_default_llama_context_params();
     contextParams.seed = 42;
     contextParams.n_ctx = 0;
 
@@ -40,7 +40,7 @@ void main() {
           'Failed to load the model file for testing! Test aborted.');
     }
 
-    final params = lib.wooly_new_params();
+    final params = lib.wooly_new_gpt_params();
     params.prompt =
         "<|user|>\nWrite the start to the next movie collaboration between Quentin Tarantino and Robert Rodriguez.<|end|>\n<|assistant|>\n"
             .toNativeUtf8() as Pointer<Char>;
@@ -53,7 +53,7 @@ void main() {
     params.min_p = 0.1;
     params.penalty_repeat = 1.1;
     params.penalty_last_n = 512;
-    params.ignore_eos = false;
+    params.ignore_eos = true;
     params.flash_attn = true;
     params.n_batch = 128;
     params.prompt_cache_all = false;
@@ -91,7 +91,7 @@ void main() {
       expect(params, isNotNull);
     });
 
-    final contextSize = lib.llama_n_ctx(loadedModel.ctx);
+    final contextSize = loadedModel.context_length;
 
     // allocate the buffer for the predicted text. by default we just use the worst
     // case scenario of a whole context size with four bytes per utf-8.
@@ -99,7 +99,7 @@ void main() {
 
     // setup the callback test by zeroing the count and creating the cb pointer
     globalCallbackCount = 0;
-    token_update_callback tokenUpdate =
+    wooly_token_update_callback tokenUpdate =
         Pointer.fromFunction(testCallback, false);
 
     var predictResult = lib.wooly_predict(params, loadedModel.ctx,
@@ -146,7 +146,7 @@ void main() {
   // Managed classes tests
 
   group('Fancy bindings tests', () {
-    const libFilepath = "src/build/libwoolydart.dylib";
+    const libFilepath = "src/build/libwoolycore.dylib";
     var llamaModel = LlamaModel(libFilepath);
 
     final modelFilepath = Platform.environment['WOOLY_TEST_MODEL_FILE'];
@@ -170,8 +170,6 @@ void main() {
     test('Model load test', () {
       expect(loadedResult, true);
       expect(checkIsLoaded, true);
-      expect(llamaModel.model, isNotNull);
-      expect(llamaModel.ctx, isNotNull);
     });
 
     if (loadedResult == false || checkIsLoaded == false) {
@@ -230,7 +228,7 @@ void main() {
 
     // do another callback test too with this run
     globalCallbackCount = 0;
-    token_update_callback tokenUpdate =
+    wooly_token_update_callback tokenUpdate =
         Pointer.fromFunction(testCallback, false);
 
     var (predictResult2, outputString2) =
@@ -270,7 +268,7 @@ void main() {
   // Managed class grammar test
 
   group('Fancy bindings gramar test', () {
-    const libFilepath = "src/build/libwoolydart.dylib";
+    const libFilepath = "src/build/libwoolycore.dylib";
     var llamaModel = LlamaModel(libFilepath);
 
     final modelFilepath = Platform.environment['WOOLY_TEST_MODEL_FILE'];
@@ -288,11 +286,11 @@ void main() {
 
     final loadedResult =
         llamaModel.loadModel(modelFilepath, modelParams, contextParams, true);
+    final isLoaded = llamaModel.isModelLoaded();
 
     test('Model load test', () {
       expect(loadedResult, true);
-      expect(llamaModel.model, isNotNull);
-      expect(llamaModel.ctx, isNotNull);
+      expect(isLoaded, true);
     });
 
     if (loadedResult == false) {
@@ -316,7 +314,7 @@ void main() {
     ]);
 
     // now we load the grammar from the llama.cpp project
-    File grammarFile = File('src/llama.cpp/grammars/json.gbnf');
+    File grammarFile = File('src/woolycore/llama.cpp/grammars/json.gbnf');
     String grammarRules = grammarFile.readAsStringSync();
     params.setGrammar(grammarRules);
 
