@@ -13,9 +13,9 @@ String getPlatformLibraryFilepath() {
 
 void main() {
   /****************************************************************************/
-  // Managed classes tests
+  // Managed class grammar test
 
-  group('Fancy bindings tests', () {
+  group('Fancy bindings gramar test', () {
     final libFilepath = getPlatformLibraryFilepath();
     var llamaModel = LlamaModel(libFilepath);
 
@@ -29,42 +29,42 @@ void main() {
     final modelParams = llamaModel.getDefaultModelParams();
     modelParams.n_gpu_layers = 100;
     final contextParams = llamaModel.getDefaultContextParams();
-    contextParams.seed = 42;
+    contextParams.seed = -1;
     contextParams.n_ctx = 2048;
 
     final loadedResult =
         llamaModel.loadModel(modelFilepath, modelParams, contextParams, true);
-
-    final checkIsLoaded = llamaModel.isModelLoaded();
+    final isLoaded = llamaModel.isModelLoaded();
 
     test('Model load test', () {
       expect(loadedResult, true);
-      expect(checkIsLoaded, true);
+      expect(isLoaded, true);
     });
 
-    if (loadedResult == false || checkIsLoaded == false) {
+    if (loadedResult == false) {
       throw Exception('Failed to load the test model! Test aborted.');
     }
 
     final params = llamaModel.getTextGenParams();
-    params.seed = 42;
-    params.n_threads = 4;
-    params.n_predict = 100;
-    params.temp = 0.1;
-    params.top_k = 1;
+    params.n_predict = -1;
+    params.temp = 1.4;
+    params.top_k = 40;
     params.top_p = 1.0;
-    params.min_p = 0.1;
+    params.min_p = 0.05;
     params.penalty_repeat = 1.1;
     params.penalty_last_n = 512;
-    params.ignore_eos = false;
     params.flash_attn = true;
     params.n_batch = 128;
-    params.prompt_cache_all = true;
     params.setPrompt(
-        "<|user|>\nWrite the start to the next movie collaboration between Quentin Tarantino and Robert Rodriguez.<|end|>\n<|assistant|>\n");
+        "<|user|>\nReturn a JSON object that describes an object in a fictional Dark Souls game. The returned JSON object should have 'Title' and 'Description' fields that define the item in the game. Make sure to write the item lore in the style of Fromsoft and thier Dark Souls series of games: there should be over-the-top naming of fantastically gross monsters and tragic historical events from the world, all with a very nihilistic feel.<|end|>\n<|assistant|>\n");
     params.setAntiprompts([
       "<|end|>",
     ]);
+
+    // now we load the grammar from the llama.cpp project
+    File grammarFile = File('src/woolycore/llama.cpp/grammars/json.gbnf');
+    String grammarRules = grammarFile.readAsStringSync();
+    params.setGrammar(grammarRules);
 
     test('Parameter creation test', () {
       expect(params, isNotNull);
@@ -91,41 +91,6 @@ void main() {
         predictResult.n_p_eval,
         predictResult.t_p_eval_ms,
         1e3 / predictResult.t_p_eval_ms * predictResult.n_p_eval));
-
-    // change the seed and generate again with the same prompt. this should trigger
-    // the use of the prompt cache and drop n_p_eval and t_p_eval_ms down to 0.
-    params.seed = 1337;
-
-    // do another callback test too with this run
-    globalCallbackCount = 0;
-    wooly_token_update_callback tokenUpdate =
-        Pointer.fromFunction(testCallback, false);
-
-    var (predictResult2, outputString2) =
-        llamaModel.predictText(params, tokenUpdate);
-
-    test('Text Prediction', () {
-      expect(predictResult2.result, 0);
-      expect(predictResult2.n_p_eval, 0);
-      expect(predictResult2.t_p_eval_ms, 0);
-      expect(globalCallbackCount, 100);
-    });
-
-    // Print out the generated text for fun as well as some stats on timing.
-    print(format('\nUsing the same prompt but different seed:\n{}',
-        outputString2 ?? "<failed prediction>"));
-    print(
-      format(
-          '\nTiming Data: {} tokens total in {:.2f} ms ({:.2f} T/s) ; {} prompt tokens in {:.2f} ms ({:.2f} T/s)\n',
-          predictResult2.n_eval,
-          (predictResult2.t_end_ms - predictResult2.t_start_ms),
-          1e3 /
-              (predictResult2.t_end_ms - predictResult2.t_start_ms) *
-              predictResult2.n_eval,
-          predictResult2.n_p_eval,
-          predictResult2.t_p_eval_ms,
-          1e3 / predictResult2.t_p_eval_ms * predictResult2.n_p_eval),
-    );
 
     // free the allocated memory
     tearDownAll(() {

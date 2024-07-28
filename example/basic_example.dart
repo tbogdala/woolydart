@@ -7,12 +7,16 @@ import 'package:ffi/ffi.dart';
 import 'package:format/format.dart';
 import 'package:woolydart/woolydart.dart';
 
+String getPlatformLibraryFilepath() {
+  return (Platform.isMacOS) ? "src/build/libwoolycore.dylib" : "src/build/libwoolycore.so";
+}
+
 void main(List<String> args) {
   ArgResults parsedArgs = _parseArgs(args);
 
   // load the library up for ffi work; the actual filepath
   // depends on the operating system's perference for libraries.
-  const libFilepath = "src/build/libwoolycore.dylib";
+  final libFilepath = getPlatformLibraryFilepath();
   var llamaModel = LlamaModel(libFilepath);
 
   // setup the model parameters which has options to control

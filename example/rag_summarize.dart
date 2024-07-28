@@ -9,11 +9,18 @@ import 'package:woolydart/woolydart.dart';
 
 typedef ParseHtmlFunction = Pointer<Utf8> Function(Pointer<Utf8>);
 
+String getPlatformLibraryFilepath() {
+  return (Platform.isMacOS) ? "src/build/libwoolycore.dylib" : "src/build/libwoolycore.so";
+}
+
+String getReadabilityLibraryFilepath() {
+  return (Platform.isMacOS) ? 'src/libreadability/target/release/libreadability.dylib' : 'src/libreadability/target/release/libreadability.so';
+}
+
 String cleanUpWithReadable(String html) {
   // Load the dynamic library - this will need to be compiled by hand first and requires
   // a rust toolchain!
-  final File libreadablePath =
-      File('src/libreadability/target/release/libreadability.dylib');
+  final File libreadablePath = File(getReadabilityLibraryFilepath());
   if (!libreadablePath.existsSync()) {
     print('\nWARNING!');
     print('\nThis sample uses a Rust library to clean up the HTML being sent');
@@ -80,7 +87,7 @@ void main(List<String> args) async {
 
   // load the library up for ffi work; the actual filepath
   // depends on the operating system's perference for libraries.
-  const libFilepath = "src/build/libwoolycore.dylib";
+  final libFilepath = getPlatformLibraryFilepath();
   var llamaModel = LlamaModel(libFilepath);
 
   // setup the model parameters which has options to control

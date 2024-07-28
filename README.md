@@ -6,7 +6,7 @@ library builds upon are are provided by the [woolycore](https://github.com/tbogd
 
 At present, it is in pre-alpha development and the API is unstable. 
 
-Supported Operating Systems: MacOS, iOS, Android (more to come!)
+Supported Operating Systems: MacOS, Linux, iOS, Android 
 
 
 ## License
@@ -34,7 +34,14 @@ cmake -B build woolycore
 cmake --build build --config Release
 ```
 
-This will generate the library files required so that the Dart wrapper can load them.
+This will generate the library files required so that the Dart wrapper can load them. This will automatically
+use metal on MacOS, but for CUDA platforms you'll need to enable it with a separate flag:
+
+```bash
+cd src
+cmake -B build -DGGML_CUDA=On woolycore
+cmake --build build --config Release
+```
 
 
 ## Git updates
@@ -55,8 +62,11 @@ You can run the tests by using the following command:
 
 ```bash
 export WOOLY_TEST_MODEL_FILE=models/example-llama-3-8b.gguf
-dart test
+dart test --concurrency=1
 ```
+
+It's important to limit concurrency or else the tests will run in parallel and cause performance
+and memory limit issues.
 
 
 ## Examples
