@@ -25,7 +25,7 @@ void main() {
 
     var contextParams = lib.wooly_get_default_llama_context_params();
     contextParams.seed = 42;
-    contextParams.n_ctx = 0;
+    contextParams.n_ctx = 2048;
 
     var loadedModel = lib.wooly_load_model(
         modelPath as Pointer<Char>, modelParams, contextParams, true);
@@ -160,7 +160,7 @@ void main() {
     modelParams.n_gpu_layers = 100;
     final contextParams = llamaModel.getDefaultContextParams();
     contextParams.seed = 42;
-    contextParams.n_ctx = 0;
+    contextParams.n_ctx = 2048;
 
     final loadedResult =
         llamaModel.loadModel(modelFilepath, modelParams, contextParams, true);
@@ -282,7 +282,7 @@ void main() {
     modelParams.n_gpu_layers = 100;
     final contextParams = llamaModel.getDefaultContextParams();
     contextParams.seed = -1;
-    contextParams.n_ctx = 0;
+    contextParams.n_ctx = 2048;
 
     final loadedResult =
         llamaModel.loadModel(modelFilepath, modelParams, contextParams, true);

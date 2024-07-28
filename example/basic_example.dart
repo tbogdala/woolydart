@@ -32,10 +32,13 @@ void main(List<String> args) {
   // or to a particular value if consistency is needed as well as
   // setting the size of the context. Setting `n_ctx`, the size of the context,
   // to 0 is shorthand to let llama.cpp set it to the maximum size supported
-  // by the GGUF model.
+  // by the GGUF model; for models with large context, this may have
+  // very large memory requirements.
   final contextParams = llamaModel.getDefaultContextParams()
     ..seed = 42
-    ..n_ctx = 0;
+    ..n_ctx = (parsedArgs['contextsize'] != null)
+        ? int.parse(parsedArgs.option('contextsize')!)
+        : 1024 * 2;
 
   // get the model filepath to load for text inference from the command-line
   String modelFilepath = parsedArgs.option('model')!;
@@ -142,6 +145,9 @@ ArgParser _buildArgParser() {
       help: 'GGUF model file to user for text generation');
   parser.addOption('prompt',
       abbr: 'p', help: 'A custom prompt to use for text generation');
+  parser.addOption('contextsize',
+      abbr: 'c',
+      help: 'The size of the context for the LLM in tokens (default: 4096).');
   parser.addFlag('quiet',
       defaultsTo: false,
       abbr: 'q',
