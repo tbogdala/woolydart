@@ -6,7 +6,7 @@ library builds upon are are provided by the [woolycore](https://github.com/tbogd
 
 At present, it is in pre-alpha development and the API is unstable. 
 
-Supported Operating Systems: MacOS, Linux, iOS, Android 
+Supported Operating Systems: Windows, MacOS, Linux, iOS, Android 
 
 
 ## License
@@ -42,6 +42,24 @@ cd src
 cmake -B build -DGGML_CUDA=On woolycore
 cmake --build build --config Release
 ```
+
+Windows users have an extra level of pain to deal with and need additional steps to make all this work
+(in this example, CUDA is enabled, but `-DGGML_CUDA=On` can be removed for a CPU only build):
+
+```bash
+cd src
+cmake -B build -DGGML_CUDA=On -DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=TRUE -DBUILD_SHARED_LIBS=TRUE woolycore
+cmake --build build --config Release
+cd ..
+
+# basically we now need to make the compiled dll files findable while running the tests.
+# the simple solution is to just copy them to the project root for test running.
+
+cp src/build/bin/Release/ggml.dll .
+cp src/build/bin/Release/llama.dll .
+cp src/build//Release/woolycore.dll .
+```
+
 
 
 ## Git updates
@@ -128,6 +146,11 @@ This generates the following output:
 Performance data: 358 tokens (1529 characters) total in 371565.63 ms (0.96 T/s) ; 
 26962 prompt tokens in 289057.38 ms (93.28 T/s)
 ```
+
+The same example with the same context size and URL, but using Meta-Llama-3.1-8B-Instruct-Q8_0.gguf, gives the 
+following performance on a Windows 11 machine with a 4090 and an AMD R9 7950X: 
+
+`Performance data: 249 tokens (1171 characters) total in 12499.50 ms (19.92 T/s) ; 19967 prompt tokens in 8117.99 ms (2459.60 T/s)`
 
 For a fun time on MacOS, you can configure `Accessibility > Spoken Content` in the `System Settings` app to have the 
 system voice you want, and then re-run the above example but quiet `llama.cpp`'s output and then pipe the generated

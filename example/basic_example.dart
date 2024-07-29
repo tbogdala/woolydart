@@ -8,7 +8,13 @@ import 'package:format/format.dart';
 import 'package:woolydart/woolydart.dart';
 
 String getPlatformLibraryFilepath() {
-  return (Platform.isMacOS) ? "src/build/libwoolycore.dylib" : "src/build/libwoolycore.so";
+  if (Platform.isMacOS) {
+    return "src/build/libwoolycore.dylib";
+  } else if (Platform.isWindows) {
+    return "woolycore.dll";
+  } else {
+    return "src/build/libwoolycore.so";
+  }
 }
 
 void main(List<String> args) {

@@ -10,3 +10,4 @@ pubspec.lock
 .vscode
 
 src/build*
+*.dll

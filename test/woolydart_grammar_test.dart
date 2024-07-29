@@ -1,14 +1,18 @@
 import 'dart:ffi';
 import 'dart:io';
-import 'package:ffi/ffi.dart';
 import 'package:format/format.dart';
 import 'package:test/test.dart';
-import 'dart:developer';
 
 import 'package:woolydart/woolydart.dart';
 
 String getPlatformLibraryFilepath() {
-  return (Platform.isMacOS) ? "src/build/libwoolycore.dylib" : "src/build/libwoolycore.so";
+  if (Platform.isMacOS) {
+    return "src/build/libwoolycore.dylib";
+  } else if (Platform.isWindows) {
+    return "woolycore.dll";
+  } else {
+    return "src/build/libwoolycore.so";
+  }
 }
 
 void main() {

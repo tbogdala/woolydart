@@ -10,11 +10,23 @@ import 'package:woolydart/woolydart.dart';
 typedef ParseHtmlFunction = Pointer<Utf8> Function(Pointer<Utf8>);
 
 String getPlatformLibraryFilepath() {
-  return (Platform.isMacOS) ? "src/build/libwoolycore.dylib" : "src/build/libwoolycore.so";
+  if (Platform.isMacOS) {
+    return "src/build/libwoolycore.dylib";
+  } else if (Platform.isWindows) {
+    return "woolycore.dll";
+  } else {
+    return "src/build/libwoolycore.so";
+  }
 }
 
 String getReadabilityLibraryFilepath() {
-  return (Platform.isMacOS) ? 'src/libreadability/target/release/libreadability.dylib' : 'src/libreadability/target/release/libreadability.so';
+  if (Platform.isMacOS) {
+    return 'src/libreadability/target/release/libreadability.dylib';
+  } else if (Platform.isWindows) {
+    return 'src/libreadability/target/release/readability.dll';
+  } else {
+    return 'src/libreadability/target/release/libreadability.so';
+  }
 }
 
 String cleanUpWithReadable(String html) {
