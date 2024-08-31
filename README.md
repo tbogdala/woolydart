@@ -8,6 +8,8 @@ At present, it is in development and the API is unstable, though no breaking cha
 
 Supported Operating Systems: Windows, MacOS, Linux, iOS, Android 
 
+Note: Android support appears to be non-accelerated.
+
 
 ## License
 
