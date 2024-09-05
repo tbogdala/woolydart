@@ -104,16 +104,25 @@ void main() {
     final contextSize = loadedModel.context_length;
 
     // allocate the buffer for the predicted text. by default we just use the worst
-    // case scenario of a whole context size with four bytes per utf-8.
-    final outputText = calloc.allocate(contextSize * 4) as Pointer<Char>;
+    // case scenario of a whole context size with four bytes per utf-8 and ten
+    // characters per token.
+    final outputTextSize = contextSize * 4 * 10;
+    final outputText = calloc.allocate(outputTextSize) as Pointer<Char>;
 
     // setup the callback test by zeroing the count and creating the cb pointer
     globalCallbackCount = 0;
     wooly_token_update_callback tokenUpdate =
         Pointer.fromFunction(testCallback, false);
 
-    var predictResult = lib.wooly_predict(params, loadedModel.ctx,
-        loadedModel.model, false, outputText, nullptr, tokenUpdate);
+    var predictResult = lib.wooly_predict(
+        params,
+        loadedModel.ctx,
+        loadedModel.model,
+        false,
+        outputText,
+        outputTextSize,
+        nullptr,
+        tokenUpdate);
 
     test('Text Prediction', () {
       expect(predictResult.result, 0);

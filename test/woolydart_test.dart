@@ -50,6 +50,24 @@ void main() {
       throw Exception('Failed to load the test model! Test aborted.');
     }
 
+    // check the length of a string in tokens; the second bool is set to true
+    // so that 'special tokens' get parsed and if using a llama3 tokenizer, for
+    // example, the following test string gets tokenized differently.
+    final tokenLenTestString =
+        "<|start_header_id|>assistant<|end_header_id|>\n\nI've seen things you people wouldn't believe. Attack ships on fire off the shoulder of Orion.";
+    final tokenCount =
+        llamaModel.getTokenCount(tokenLenTestString, false, true);
+    print(
+        'We got a test token length of $tokenCount for "$tokenLenTestString"\n');
+
+    // we'll set the test to have a pretty wide margin of acceptable values here
+    // because the user may have any GGUF select to run the test with ... we just
+    // want to make sure we're getting approximately a reasonable number.
+    test('Model token count test', () {
+      expect(tokenCount > 10, true);
+      expect(tokenCount < 100, true);
+    });
+
     final params = llamaModel.getTextGenParams();
     params.seed = 42;
     params.n_threads = 4;

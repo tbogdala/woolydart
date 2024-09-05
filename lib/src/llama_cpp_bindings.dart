@@ -78,6 +78,7 @@ class woolydart {
     ffi.Pointer<ffi.Void> llama_model_ptr,
     bool include_specials,
     ffi.Pointer<ffi.Char> out_result,
+    int out_result_size,
     ffi.Pointer<ffi.Void> prompt_cache_ptr,
     wooly_token_update_callback token_cb,
   ) {
@@ -87,6 +88,7 @@ class woolydart {
       llama_model_ptr,
       include_specials,
       out_result,
+      out_result_size,
       prompt_cache_ptr,
       token_cb,
     );
@@ -100,6 +102,7 @@ class woolydart {
               ffi.Pointer<ffi.Void>,
               ffi.Bool,
               ffi.Pointer<ffi.Char>,
+              ffi.Int64,
               ffi.Pointer<ffi.Void>,
               wooly_token_update_callback)>>('wooly_predict');
   late final _wooly_predict = _wooly_predictPtr.asFunction<
@@ -109,6 +112,7 @@ class woolydart {
           ffi.Pointer<ffi.Void>,
           bool,
           ffi.Pointer<ffi.Char>,
+          int,
           ffi.Pointer<ffi.Void>,
           wooly_token_update_callback)>();
 
@@ -147,6 +151,135 @@ class woolydart {
   late final _wooly_get_default_llama_context_params =
       _wooly_get_default_llama_context_paramsPtr
           .asFunction<wooly_llama_context_params Function()>();
+
+  int wooly_llama_n_embd(
+    ffi.Pointer<ffi.Void> llama_model_ptr,
+  ) {
+    return _wooly_llama_n_embd(
+      llama_model_ptr,
+    );
+  }
+
+  late final _wooly_llama_n_embdPtr =
+      _lookup<ffi.NativeFunction<ffi.Int32 Function(ffi.Pointer<ffi.Void>)>>(
+          'wooly_llama_n_embd');
+  late final _wooly_llama_n_embd =
+      _wooly_llama_n_embdPtr.asFunction<int Function(ffi.Pointer<ffi.Void>)>();
+
+  int wooly_llama_tokenize(
+    ffi.Pointer<ffi.Void> llama_model_ptr,
+    ffi.Pointer<ffi.Char> text,
+    bool add_special,
+    bool parse_special,
+    ffi.Pointer<ffi.Int32> out_tokens,
+    int out_tokens_size,
+  ) {
+    return _wooly_llama_tokenize(
+      llama_model_ptr,
+      text,
+      add_special,
+      parse_special,
+      out_tokens,
+      out_tokens_size,
+    );
+  }
+
+  late final _wooly_llama_tokenizePtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int64 Function(
+              ffi.Pointer<ffi.Void>,
+              ffi.Pointer<ffi.Char>,
+              ffi.Bool,
+              ffi.Bool,
+              ffi.Pointer<ffi.Int32>,
+              ffi.Int64)>>('wooly_llama_tokenize');
+  late final _wooly_llama_tokenize = _wooly_llama_tokenizePtr.asFunction<
+      int Function(ffi.Pointer<ffi.Void>, ffi.Pointer<ffi.Char>, bool, bool,
+          ffi.Pointer<ffi.Int32>, int)>();
+
+  int wooly_llama_detokenize(
+    ffi.Pointer<ffi.Void> llama_context_ptr,
+    bool render_specials,
+    ffi.Pointer<ffi.Int32> tokens,
+    int tokens_size,
+    ffi.Pointer<ffi.Char> out_result,
+    int out_result_size,
+  ) {
+    return _wooly_llama_detokenize(
+      llama_context_ptr,
+      render_specials,
+      tokens,
+      tokens_size,
+      out_result,
+      out_result_size,
+    );
+  }
+
+  late final _wooly_llama_detokenizePtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int64 Function(
+              ffi.Pointer<ffi.Void>,
+              ffi.Bool,
+              ffi.Pointer<ffi.Int32>,
+              ffi.Int64,
+              ffi.Pointer<ffi.Char>,
+              ffi.Int64)>>('wooly_llama_detokenize');
+  late final _wooly_llama_detokenize = _wooly_llama_detokenizePtr.asFunction<
+      int Function(ffi.Pointer<ffi.Void>, bool, ffi.Pointer<ffi.Int32>, int,
+          ffi.Pointer<ffi.Char>, int)>();
+
+  int wooly_llama_make_embeddings(
+    ffi.Pointer<ffi.Void> llama_model_ptr,
+    ffi.Pointer<ffi.Void> llama_context_ptr,
+    int batch_size,
+    int pooling_type,
+    int embd_normalize,
+    int token_array_count,
+    ffi.Pointer<ffi.Pointer<ffi.Int32>> token_arrays,
+    ffi.Pointer<ffi.Int64> token_array_sizes,
+    ffi.Pointer<ffi.Float> output_embeddings,
+    int output_embeddings_size,
+  ) {
+    return _wooly_llama_make_embeddings(
+      llama_model_ptr,
+      llama_context_ptr,
+      batch_size,
+      pooling_type,
+      embd_normalize,
+      token_array_count,
+      token_arrays,
+      token_array_sizes,
+      output_embeddings,
+      output_embeddings_size,
+    );
+  }
+
+  late final _wooly_llama_make_embeddingsPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Long Function(
+              ffi.Pointer<ffi.Void>,
+              ffi.Pointer<ffi.Void>,
+              ffi.Int32,
+              ffi.Int32,
+              ffi.Int32,
+              ffi.Int64,
+              ffi.Pointer<ffi.Pointer<ffi.Int32>>,
+              ffi.Pointer<ffi.Int64>,
+              ffi.Pointer<ffi.Float>,
+              ffi.Int64)>>('wooly_llama_make_embeddings');
+  late final _wooly_llama_make_embeddings =
+      _wooly_llama_make_embeddingsPtr.asFunction<
+          int Function(
+              ffi.Pointer<ffi.Void>,
+              ffi.Pointer<ffi.Void>,
+              int,
+              int,
+              int,
+              int,
+              ffi.Pointer<ffi.Pointer<ffi.Int32>>,
+              ffi.Pointer<ffi.Int64>,
+              ffi.Pointer<ffi.Float>,
+              int)>();
 }
 
 final class wooly_load_model_result extends ffi.Struct {
@@ -159,7 +292,7 @@ final class wooly_load_model_result extends ffi.Struct {
 }
 
 final class wooly_predict_result extends ffi.Struct {
-  @ffi.Int()
+  @ffi.Int32()
   external int result;
 
   external ffi.Pointer<ffi.Void> prompt_cache;
@@ -182,10 +315,10 @@ final class wooly_predict_result extends ffi.Struct {
   @ffi.Double()
   external double t_eval_ms;
 
-  @ffi.Int()
+  @ffi.Int32()
   external int n_sample;
 
-  @ffi.Int()
+  @ffi.Int32()
   external int n_p_eval;
 
   @ffi.Int()
@@ -287,7 +420,7 @@ final class wooly_gpt_params extends ffi.Struct {
 
   external ffi.Pointer<ffi.Pointer<ffi.Char>> antiprompts;
 
-  @ffi.Int()
+  @ffi.Int32()
   external int antiprompt_count;
 
   @ffi.Uint32()
@@ -347,7 +480,7 @@ final class wooly_gpt_params extends ffi.Struct {
   @ffi.Int32()
   external int yarn_orig_ctx;
 
-  @ffi.Int()
+  @ffi.Int32()
   external int rope_scaling_type;
 
   @ffi.Bool()
@@ -358,6 +491,12 @@ final class wooly_gpt_params extends ffi.Struct {
 
   @ffi.Bool()
   external bool flash_attn;
+
+  @ffi.Bool()
+  external bool embedding;
+
+  @ffi.Int32()
+  external int embd_normalize;
 
   @ffi.Int32()
   external int top_k;

@@ -19,7 +19,7 @@ void main() {
   /****************************************************************************/
   // Managed class grammar test
 
-  group('Fancy bindings gramar test', () {
+  group('Fancy bindings grammar test', () {
     final libFilepath = getPlatformLibraryFilepath();
     var llamaModel = LlamaModel(libFilepath);
 
