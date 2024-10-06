@@ -47,11 +47,8 @@ class LlamaModel {
   // the size of the context used to load the model
   int _loadedContextLength = 0;
 
-  // the model parameters used when loading the current model
-  wooly_llama_model_params? _loadedModelParams = null;
-
   // the context parameters used when loading the current model
-  wooly_llama_context_params? _loadedContextParams = null;
+  wooly_llama_context_params? _loadedContextParams;
 
   // Construct a new LlamaModel wrapper for llama.cpp by giving it a filepath
   // to the compiled library. On Android, this might be 'libwoolydart.so'. On iOS
@@ -93,7 +90,6 @@ class LlamaModel {
     _ctx = loadedModel.ctx;
     _lastPromptCache = nullptr;
     _loadedContextLength = loadedModel.context_length;
-    _loadedModelParams = modelParams;
     _loadedContextParams = contextParams;
 
     return true;
@@ -109,7 +105,6 @@ class LlamaModel {
     _ctx = nullptr;
     _model = nullptr;
     _loadedContextLength = 0;
-    _loadedModelParams = null;
     _loadedContextParams = null;
   }
 
@@ -239,7 +234,7 @@ class LlamaModel {
 
     // if we didn't pass the right size buffer, free it and recreate
     // with the absolute value of the returned number and try again.
-    String? returnVal = null;
+    String? returnVal;
     if (detokenCount < 0) {
       calloc.free(outputText);
       outputTextSize = detokenCount.abs() + 1;

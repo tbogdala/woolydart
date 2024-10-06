@@ -4,11 +4,9 @@ A Dart wrapper around the [llama.cpp library](https://github.com/ggerganov/llama
 API that provides enough functionality to be versatile and useful. The basic, higher-level C functions that this
 library builds upon are are provided by the [woolycore](https://github.com/tbogdala/woolycore) library.
 
-At present, it is in development and the API is unstable, though no breaking changes are envisioned. 
-
 Supported Operating Systems: Windows, MacOS, Linux, iOS, Android 
 
-Note: Android support appears to be non-accelerated.
+Note: Android support is non-GPU accelerated.
 
 
 ## License

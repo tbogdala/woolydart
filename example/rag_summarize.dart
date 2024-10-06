@@ -115,14 +115,11 @@ void main(List<String> args) async {
   // how the model behaves under text inference. this is a llama.cpp
   // structure, and the defaults come from the upstream library.
   //
-  // Particularly important here is setting the seed to -1 for random
-  // or to a particular value if consistency is needed as well as
-  // setting the size of the context. Setting `n_ctx`, the size of the context,
-  // to 0 is shorthand to let llama.cpp set it to the maximum size supported
+  // Setting `n_ctx`, the size of the context, to 0 is shorthand
+  // to let llama.cpp set it to the maximum size supported
   // by the GGUF model; for models with large context, this may have
   // very large memory requirements.
   final contextParams = llamaModel.getDefaultContextParams()
-    ..seed = 42
     ..n_ctx = (parsedArgs['contextsize'] != null)
         ? int.parse(parsedArgs.option('contextsize')!)
         : 1024 * 4;

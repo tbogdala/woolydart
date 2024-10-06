@@ -34,7 +34,6 @@ void main() {
     modelParams.n_gpu_layers = 100;
 
     var contextParams = lib.wooly_get_default_llama_context_params();
-    contextParams.seed = 42;
     contextParams.n_ctx = 2048;
 
     var loadedModel = lib.wooly_load_model(

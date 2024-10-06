@@ -28,7 +28,6 @@ void main() {
     final modelParams = llamaModel.getDefaultModelParams();
     modelParams.n_gpu_layers = 100;
     final contextParams = llamaModel.getDefaultContextParams();
-    contextParams.seed = 42;
     contextParams.n_ctx = 2048;
 
     // the test is designed for nomic-ai/nomic-embed-text-v1.5-GGUF which has 2048 context by default.
@@ -86,7 +85,7 @@ void main() {
       expect(embeddings.first.isNotEmpty, true);
     });
     print(
-        "\nWe got back ${embeddings.length} embeddings, of size ${embeddings.first?.length}");
+        "\nWe got back ${embeddings.length} embeddings, of size ${embeddings.first.length}");
 
     // calculate the sentence similarity scores and print them out
     print('\n\nTesting similarity to: "${prompts.first}"\n');

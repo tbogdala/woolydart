@@ -307,16 +307,10 @@ final class wooly_predict_result extends ffi.Struct {
   external double t_load_ms;
 
   @ffi.Double()
-  external double t_sample_ms;
-
-  @ffi.Double()
   external double t_p_eval_ms;
 
   @ffi.Double()
   external double t_eval_ms;
-
-  @ffi.Int32()
-  external int n_sample;
 
   @ffi.Int32()
   external int n_p_eval;
@@ -351,9 +345,6 @@ final class wooly_llama_model_params extends ffi.Struct {
 }
 
 final class wooly_llama_context_params extends ffi.Struct {
-  @ffi.Uint32()
-  external int seed;
-
   @ffi.Uint32()
   external int n_ctx;
 

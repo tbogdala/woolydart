@@ -33,7 +33,6 @@ void main() {
     final modelParams = llamaModel.getDefaultModelParams();
     modelParams.n_gpu_layers = 100;
     final contextParams = llamaModel.getDefaultContextParams();
-    contextParams.seed = -1;
     contextParams.n_ctx = 2048;
 
     final loadedResult =
