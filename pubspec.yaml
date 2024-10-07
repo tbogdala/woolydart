@@ -1,6 +1,6 @@
 name: woolydart
 description: A llama.cpp wrapper for Dart that has a high-level wrapper with low-level functions exposed. Built on top of `woolycore`.
-version: 0.1.0
+version: 0.1.1
 repository: https://github.com/tbogdala/woolydart
 
 environment:
