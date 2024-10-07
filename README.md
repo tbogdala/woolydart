@@ -48,7 +48,7 @@ Windows users have an extra level of pain to deal with and need additional steps
 
 ```bash
 cd src
-cmake -B build -DGGML_CUDA=On -DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=TRUE -DBUILD_SHARED_LIBS=TRUE woolycore
+cmake -B build -DGGML_CUDA=On -DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=TRUE woolycore
 cmake --build build --config Release
 cd ..
 
