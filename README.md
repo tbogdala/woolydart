@@ -20,6 +20,8 @@ MIT licensed, like the core upstream `llama.cpp` it wraps. See `LICENSE` for det
 * Basic samplers of llama.cpp, including: temp, top-k, top-p, min-p, tail free sampling, locally typical sampling, mirostat.
 * Support for llama.cpp's BNF-like grammar rules for sampling.
 * Ability to cache the processed prompt data in memory so that it can be reused to speed up regeneration using the exact same prompt.
+  Additionally, the processed prompt and predicted tokens can cache the model state after prediction as well so that it may
+  be resumed quickly.
 
 
 ## Build notes
@@ -30,16 +32,19 @@ README file, but the basic build can be executed with the following commands:
 
 ```bash
 cd src
-cmake -B build woolycore
+cmake -B build -DWOOLY_TESTS=Off woolycore
 cmake --build build --config Release
 ```
 
-This will generate the library files required so that the Dart wrapper can load them. This will automatically
-use metal on MacOS, but for CUDA platforms you'll need to enable it with a separate flag:
+This will generate the library files required so that the Dart wrapper can load them. Additionally,
+this sets an additional CMake flag to stop woolycore from building its unit tests. 
+
+This will automatically use metal on MacOS, but for CUDA platforms you'll need to enable 
+it with a separate flag:
 
 ```bash
 cd src
-cmake -B build -DGGML_CUDA=On woolycore
+cmake -B build -DWOOLY_TESTS=Off -DGGML_CUDA=On woolycore
 cmake --build build --config Release
 ```
 
@@ -48,7 +53,7 @@ Windows users have an extra level of pain to deal with and need additional steps
 
 ```bash
 cd src
-cmake -B build -DGGML_CUDA=On -DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=TRUE woolycore
+cmake -B build -DWOOLY_TESTS=Off -DGGML_CUDA=On -DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=TRUE woolycore
 cmake --build build --config Release
 cd ..
 

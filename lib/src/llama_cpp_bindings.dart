@@ -72,6 +72,166 @@ class woolydart {
   late final _wooly_new_gpt_params =
       _wooly_new_gpt_paramsPtr.asFunction<wooly_gpt_params Function()>();
 
+  wooly_process_prompt_results wooly_process_prompt(
+    wooly_gpt_params simple_params,
+    ffi.Pointer<ffi.Void> llama_context_ptr,
+    ffi.Pointer<ffi.Void> llama_model_ptr,
+  ) {
+    return _wooly_process_prompt(
+      simple_params,
+      llama_context_ptr,
+      llama_model_ptr,
+    );
+  }
+
+  late final _wooly_process_promptPtr = _lookup<
+      ffi.NativeFunction<
+          wooly_process_prompt_results Function(
+              wooly_gpt_params,
+              ffi.Pointer<ffi.Void>,
+              ffi.Pointer<ffi.Void>)>>('wooly_process_prompt');
+  late final _wooly_process_prompt = _wooly_process_promptPtr.asFunction<
+      wooly_process_prompt_results Function(
+          wooly_gpt_params, ffi.Pointer<ffi.Void>, ffi.Pointer<ffi.Void>)>();
+
+  void wooly_free_sampler(
+    ffi.Pointer<ffi.Void> gpt_sampler_ptr,
+  ) {
+    return _wooly_free_sampler(
+      gpt_sampler_ptr,
+    );
+  }
+
+  late final _wooly_free_samplerPtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Pointer<ffi.Void>)>>(
+          'wooly_free_sampler');
+  late final _wooly_free_sampler =
+      _wooly_free_samplerPtr.asFunction<void Function(ffi.Pointer<ffi.Void>)>();
+
+  int wooly_process_next_token(
+    ffi.Pointer<ffi.Void> llama_context_ptr,
+    int next_token,
+    int position,
+  ) {
+    return _wooly_process_next_token(
+      llama_context_ptr,
+      next_token,
+      position,
+    );
+  }
+
+  late final _wooly_process_next_tokenPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int32 Function(ffi.Pointer<ffi.Void>, ffi.Int32,
+              ffi.Int32)>>('wooly_process_next_token');
+  late final _wooly_process_next_token = _wooly_process_next_tokenPtr
+      .asFunction<int Function(ffi.Pointer<ffi.Void>, int, int)>();
+
+  int wooly_sample_next(
+    ffi.Pointer<ffi.Void> llama_context_ptr,
+    ffi.Pointer<ffi.Void> gpt_sampler_ptr,
+  ) {
+    return _wooly_sample_next(
+      llama_context_ptr,
+      gpt_sampler_ptr,
+    );
+  }
+
+  late final _wooly_sample_nextPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int32 Function(ffi.Pointer<ffi.Void>,
+              ffi.Pointer<ffi.Void>)>>('wooly_sample_next');
+  late final _wooly_sample_next = _wooly_sample_nextPtr
+      .asFunction<int Function(ffi.Pointer<ffi.Void>, ffi.Pointer<ffi.Void>)>();
+
+  int wooly_check_eog_and_antiprompt(
+    wooly_gpt_params simple_params,
+    ffi.Pointer<ffi.Void> llama_context_ptr,
+    ffi.Pointer<ffi.Void> llama_model_ptr,
+    ffi.Pointer<ffi.Void> gpt_sampler_ptr,
+  ) {
+    return _wooly_check_eog_and_antiprompt(
+      simple_params,
+      llama_context_ptr,
+      llama_model_ptr,
+      gpt_sampler_ptr,
+    );
+  }
+
+  late final _wooly_check_eog_and_antipromptPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int32 Function(
+              wooly_gpt_params,
+              ffi.Pointer<ffi.Void>,
+              ffi.Pointer<ffi.Void>,
+              ffi.Pointer<ffi.Void>)>>('wooly_check_eog_and_antiprompt');
+  late final _wooly_check_eog_and_antiprompt =
+      _wooly_check_eog_and_antipromptPtr.asFunction<
+          int Function(wooly_gpt_params, ffi.Pointer<ffi.Void>,
+              ffi.Pointer<ffi.Void>, ffi.Pointer<ffi.Void>)>();
+
+  ffi.Pointer<ffi.Void> wooly_freeze_prediction_state(
+    wooly_gpt_params simple_params,
+    ffi.Pointer<ffi.Void> llama_context_ptr,
+    ffi.Pointer<ffi.Void> llama_model_ptr,
+    ffi.Pointer<ffi.Int32> predicted_tokens,
+    int predicted_token_count,
+  ) {
+    return _wooly_freeze_prediction_state(
+      simple_params,
+      llama_context_ptr,
+      llama_model_ptr,
+      predicted_tokens,
+      predicted_token_count,
+    );
+  }
+
+  late final _wooly_freeze_prediction_statePtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Pointer<ffi.Void> Function(
+              wooly_gpt_params,
+              ffi.Pointer<ffi.Void>,
+              ffi.Pointer<ffi.Void>,
+              ffi.Pointer<ffi.Int32>,
+              ffi.Int32)>>('wooly_freeze_prediction_state');
+  late final _wooly_freeze_prediction_state =
+      _wooly_freeze_prediction_statePtr.asFunction<
+          ffi.Pointer<ffi.Void> Function(
+              wooly_gpt_params,
+              ffi.Pointer<ffi.Void>,
+              ffi.Pointer<ffi.Void>,
+              ffi.Pointer<ffi.Int32>,
+              int)>();
+
+  wooly_process_prompt_results wooly_defrost_prediction_state(
+    wooly_gpt_params simple_params,
+    ffi.Pointer<ffi.Void> llama_context_ptr,
+    ffi.Pointer<ffi.Void> llama_model_ptr,
+    ffi.Pointer<ffi.Void> prompt_cache_ptr,
+  ) {
+    return _wooly_defrost_prediction_state(
+      simple_params,
+      llama_context_ptr,
+      llama_model_ptr,
+      prompt_cache_ptr,
+    );
+  }
+
+  late final _wooly_defrost_prediction_statePtr = _lookup<
+      ffi.NativeFunction<
+          wooly_process_prompt_results Function(
+              wooly_gpt_params,
+              ffi.Pointer<ffi.Void>,
+              ffi.Pointer<ffi.Void>,
+              ffi.Pointer<ffi.Void>)>>('wooly_defrost_prediction_state');
+  late final _wooly_defrost_prediction_state =
+      _wooly_defrost_prediction_statePtr.asFunction<
+          wooly_process_prompt_results Function(
+              wooly_gpt_params,
+              ffi.Pointer<ffi.Void>,
+              ffi.Pointer<ffi.Void>,
+              ffi.Pointer<ffi.Void>)>();
+
   wooly_predict_result wooly_predict(
     wooly_gpt_params simple_params,
     ffi.Pointer<ffi.Void> llama_context_ptr,
@@ -317,6 +477,13 @@ final class wooly_predict_result extends ffi.Struct {
 
   @ffi.Int()
   external int n_eval;
+}
+
+final class wooly_process_prompt_results extends ffi.Struct {
+  @ffi.Int32()
+  external int result;
+
+  external ffi.Pointer<ffi.Void> gpt_sampler;
 }
 
 final class wooly_llama_model_params extends ffi.Struct {

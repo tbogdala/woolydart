@@ -32,6 +32,24 @@ typedef Token = int;
 typedef TokenList = List<Token>;
 typedef Embedding = List<double>;
 
+// this is just a basic class wrapper around a void pointer just for better
+// clarity in the API.
+class FrozenState {
+  final Pointer<Void> _cachedState;
+  bool isAlive = true;
+
+  FrozenState(this._cachedState);
+}
+
+// this is just a basic class wrapper around a void pointer just for better
+// clarity in the API.
+class GptSampler {
+  final Pointer<Void> _samplerPtr;
+  bool isAlive = true;
+
+  GptSampler(this._samplerPtr);
+}
+
 class LlamaModel {
   late woolydart lib;
 
@@ -168,6 +186,109 @@ class LlamaModel {
 
     calloc.free(outputText);
     return (predictResult, outputString);
+  }
+
+  // Takes the `params` passed in and sets up a new sampler as well as runs
+  // the prompt through the loaded model for processing. The returned GptSampler
+  // can be passed to the low-level wrapper functions for text prediction. If the
+  // returned int is a negative number there was an error, otherwise it's the number
+  // of tokens processed for the prompt.
+  (int, GptSampler) processPrompt(wooly_gpt_params params) {
+    final results = lib.wooly_process_prompt(params, _ctx, _model);
+    return (results.result, GptSampler(results.gpt_sampler));
+  }
+
+  // Takes the void pointer to the sampler returned with `processPrompt()` and
+  // ONLY samples the next token, which is returned.
+  Token sampleNextToken(GptSampler gptSampler) {
+    return lib.wooly_sample_next(_ctx, gptSampler._samplerPtr);
+  }
+
+  // Checks to see if the last sample token was the end-of-generation token
+  // defined by the model or one of the antiprompts strings in the supplied
+  // `params` parameter. Returns `true` if it is an eog or antiprompt,
+  // and returns false otherwise.
+  bool checkEogAndAntiprompt(wooly_gpt_params params, GptSampler gptSampler) {
+    final result = lib.wooly_check_eog_and_antiprompt(
+        params, _ctx, _model, gptSampler._samplerPtr);
+    if (result == 0) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  // This function takes the token sampled from `sampledNextToken` and runs
+  // it through the loaded model to compute everything necessary to sample
+  // another token following it. This is a compute heavy function call.
+  //
+  // The `position` parameter should specify the location of this token
+  // in the context. For example, if 100 tokens were processed in `processPrompt()`,
+  // and then a new token was sampled with `sampleNextToken()`, that token should
+  // be passed to this function with a position of 100.
+  //
+  // The function returns `true` if it was successful and `false` on error.
+  bool processNextToken(Token nextToken, int position) {
+    final result = lib.wooly_process_next_token(_ctx, nextToken, position);
+    if (result == 0) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  // This function 'freezes' the state of the model, pulling the prompt tokens
+  // from the `params` passed in. This should be called before any further text
+  // prediction is done with the model. If the prediction state should be frozen
+  // too, use `freezePromptWithPrediction()` instead. The returned FrozenState
+  // object should be freed when finished with it by calling `freeFrozenState()`.
+  FrozenState freezePrompt(wooly_gpt_params params) {
+    final cachedPtr =
+        lib.wooly_freeze_prediction_state(params, _ctx, _model, nullptr, 0);
+    return FrozenState(cachedPtr);
+  }
+
+  // This function 'freezes' the state of the model, pulling the prompt tokens
+  // from the `params passed in and storing a copy of the  predicted tokens.
+  // The returned FrozenState object should be freed when finished with it
+  // by calling `freeFrozenState()`.
+  FrozenState freezePromptWithPrediction(
+      wooly_gpt_params params, TokenList predictions) {
+    // build the buffer for the input prediction tokens
+    final Pointer<Int32> tokenListNative = malloc<Int32>(predictions.length);
+    for (int j = 0; j < predictions.length; j++) {
+      tokenListNative[j] = predictions[j];
+    }
+
+    final cachedPtr = lib.wooly_freeze_prediction_state(
+        params, _ctx, _model, tokenListNative, predictions.length);
+
+    malloc.free(tokenListNative);
+    return FrozenState(cachedPtr);
+  }
+
+  // This function `defrosts` a frozen state of the model, which will restore
+  // the internal state for prediction, from a frozen state made earlier. The
+  // tuple returned is the number of tokens restored (useful for calculating the
+  // position of future predicted tokens) and the new GptSampler to be used when
+  // sampling tokens.
+  (int, GptSampler) defrostFrozenState(
+      wooly_gpt_params params, FrozenState frozenState) {
+    final results = lib.wooly_defrost_prediction_state(
+        params, _ctx, _model, frozenState._cachedState);
+    return (results.result, GptSampler(results.gpt_sampler));
+  }
+
+  // Frees the memory associated with the cached frozen state.
+  void freeFrozenState(FrozenState ice) {
+    lib.wooly_free_prompt_cache(ice._cachedState);
+    ice.isAlive = false;
+  }
+
+  // Frees the memory associated with the sample.
+  void freeGptSampler(GptSampler sampler) {
+    lib.wooly_free_sampler(sampler._samplerPtr);
+    sampler.isAlive = false;
   }
 
   // returns the token count for the `textPrompt` when processed by the loaded
