@@ -95,10 +95,10 @@ class woolydart {
           wooly_gpt_params, ffi.Pointer<ffi.Void>, ffi.Pointer<ffi.Void>)>();
 
   void wooly_free_sampler(
-    ffi.Pointer<ffi.Void> gpt_sampler_ptr,
+    ffi.Pointer<ffi.Void> sampler_ptr,
   ) {
     return _wooly_free_sampler(
-      gpt_sampler_ptr,
+      sampler_ptr,
     );
   }
 
@@ -129,11 +129,11 @@ class woolydart {
 
   int wooly_sample_next(
     ffi.Pointer<ffi.Void> llama_context_ptr,
-    ffi.Pointer<ffi.Void> gpt_sampler_ptr,
+    ffi.Pointer<ffi.Void> sampler_ptr,
   ) {
     return _wooly_sample_next(
       llama_context_ptr,
-      gpt_sampler_ptr,
+      sampler_ptr,
     );
   }
 
@@ -148,13 +148,13 @@ class woolydart {
     wooly_gpt_params simple_params,
     ffi.Pointer<ffi.Void> llama_context_ptr,
     ffi.Pointer<ffi.Void> llama_model_ptr,
-    ffi.Pointer<ffi.Void> gpt_sampler_ptr,
+    ffi.Pointer<ffi.Void> sampler_ptr,
   ) {
     return _wooly_check_eog_and_antiprompt(
       simple_params,
       llama_context_ptr,
       llama_model_ptr,
-      gpt_sampler_ptr,
+      sampler_ptr,
     );
   }
 
@@ -193,7 +193,7 @@ class woolydart {
               ffi.Pointer<ffi.Void>,
               ffi.Pointer<ffi.Void>,
               ffi.Pointer<ffi.Int32>,
-              ffi.Int32)>>('wooly_freeze_prediction_state');
+              ffi.Int64)>>('wooly_freeze_prediction_state');
   late final _wooly_freeze_prediction_state =
       _wooly_freeze_prediction_statePtr.asFunction<
           ffi.Pointer<ffi.Void> Function(
