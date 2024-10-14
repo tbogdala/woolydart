@@ -416,7 +416,7 @@ class woolydart {
 
   late final _wooly_llama_make_embeddingsPtr = _lookup<
       ffi.NativeFunction<
-          ffi.Long Function(
+          ffi.Int64 Function(
               ffi.Pointer<ffi.Void>,
               ffi.Pointer<ffi.Void>,
               ffi.Int32,

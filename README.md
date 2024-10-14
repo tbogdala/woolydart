@@ -53,16 +53,10 @@ Windows users have an extra level of pain to deal with and need additional steps
 
 ```bash
 cd src
-cmake -B build -DWOOLY_TESTS=Off -DGGML_CUDA=On -DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=TRUE woolycore
+cmake -B build -DWOOLY_TESTS=Off -DGGML_CUDA=On -DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=TRUE -DBUILD_SHARED_LIBS=Off woolycore
 cmake --build build --config Release
 cd ..
-
-# basically we now need to make the compiled dll files findable while running the tests.
-# the simple solution is to just copy them to the project root for test running.
-
-cp src/build/bin/Release/ggml.dll .
-cp src/build/bin/Release/llama.dll .
-cp src/build//Release/woolycore.dll .
+cp src/build/Release/woolycore.dll .
 ```
 
 
