@@ -43,6 +43,7 @@ void main() {
     test('Model load test', () {
       expect(loadedResult, true);
       expect(checkIsLoaded, true);
+      expect(llamaModel.loadedModelFilepath, modelFilepath);
     });
 
     if (loadedResult == false || checkIsLoaded == false) {

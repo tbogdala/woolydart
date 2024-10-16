@@ -68,6 +68,9 @@ class LlamaModel {
   // the context parameters used when loading the current model
   wooly_llama_context_params? _loadedContextParams;
 
+  // the last used model filepath when calling `loadModel`
+  String? loadedModelFilepath;
+
   // Construct a new LlamaModel wrapper for llama.cpp by giving it a filepath
   // to the compiled library. On Android, this might be 'libwoolydart.so'. On iOS
   // this might be empty, ''. If the libFilepath parameter is empty, then it will
@@ -109,6 +112,7 @@ class LlamaModel {
     _lastPromptCache = nullptr;
     _loadedContextLength = loadedModel.context_length;
     _loadedContextParams = contextParams;
+    loadedModelFilepath = modelFile;
 
     return true;
   }
@@ -124,6 +128,7 @@ class LlamaModel {
     _model = nullptr;
     _loadedContextLength = 0;
     _loadedContextParams = null;
+    loadedModelFilepath = null;
   }
 
   // Returns true if a model is currently loaded, false otherwise.
