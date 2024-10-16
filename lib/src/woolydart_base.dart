@@ -370,13 +370,17 @@ class LlamaModel {
     }
 
     // make our Dart string from the result if we got detokenized characters.
-    if (detokenCount > 0) {
-      returnVal = (outputText as Pointer<Utf8>).toDartString();
+    try {
+      if (detokenCount > 0) {
+        returnVal = (outputText as Pointer<Utf8>).toDartString();
+      }
+      return returnVal;
+    } catch (e) {
+      return null;
+    } finally {
+      calloc.free(outputText);
+      malloc.free(tokenListNative);
     }
-
-    calloc.free(outputText);
-    malloc.free(tokenListNative);
-    return returnVal;
   }
 
   List<Embedding> makeEmbeddings(
