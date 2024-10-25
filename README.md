@@ -17,11 +17,12 @@ MIT licensed, like the core upstream `llama.cpp` it wraps. See `LICENSE` for det
 ## Features
 
 * Simple high-level Dart class to use for text generation (`LlamaModel`).
-* Basic samplers of llama.cpp, including: temp, top-k, top-p, min-p, tail free sampling, locally typical sampling, mirostat.
+* Basic samplers of llama.cpp, including: temp, top-k, top-p, min-p, tail free sampling, locally typical sampling, 
+  mirostat, dynamic temperature, DRY and XTC.
 * Support for llama.cpp's BNF-like grammar rules for sampling.
-* Ability to cache the processed prompt data in memory so that it can be reused to speed up regeneration using the exact same prompt.
-  Additionally, the processed prompt and predicted tokens can cache the model state after prediction as well so that it may
-  be resumed quickly.
+* Ability to cache the processed prompt data in memory so that it can be reused to speed up regeneration using 
+  the exact same prompt. Additionally, the processed prompt and predicted tokens can cache the model state after 
+  prediction as well so that it may be resumed quickly.
 
 
 ## Build notes

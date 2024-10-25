@@ -97,8 +97,7 @@ void main() {
       // run the model to calculate the next logits for the next token prediction,
       // but only do this if it's not the last iteration of the loop.
       if (predictions.length < params.n_predict) {
-        final success = llamaModel.processNextToken(
-            nextToken, promptTokenCount + predictions.length);
+        final success = llamaModel.processNextToken(nextToken);
         test('processNextToken test', () {
           expect(success, true);
         });
@@ -172,8 +171,7 @@ void main() {
       // run the model to calculate the next logits for the next token prediction,
       // but only do this if it's not the last iteration of the loop.
       if (predictions.length < params.n_predict) {
-        final success = llamaModel.processNextToken(
-            nextToken, defrostedTokenCount + predictions.length);
+        final success = llamaModel.processNextToken(nextToken);
         test('processNextToken test', () {
           expect(success, true);
         });
@@ -235,8 +233,7 @@ void main() {
       // Note: it's important to account for the new token count from the
       // frozen prediction state or else the continuation won't make sense.
       if (predictions.length < params.n_predict) {
-        final success = llamaModel.processNextToken(
-            nextToken, defrostedPredictionTokenCount + predictions.length);
+        final success = llamaModel.processNextToken(nextToken);
         test('processNextToken test', () {
           expect(success, true);
         });

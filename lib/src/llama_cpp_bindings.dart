@@ -111,21 +111,19 @@ class woolydart {
   int wooly_process_next_token(
     ffi.Pointer<ffi.Void> llama_context_ptr,
     int next_token,
-    int position,
   ) {
     return _wooly_process_next_token(
       llama_context_ptr,
       next_token,
-      position,
     );
   }
 
   late final _wooly_process_next_tokenPtr = _lookup<
       ffi.NativeFunction<
-          ffi.Int32 Function(ffi.Pointer<ffi.Void>, ffi.Int32,
-              ffi.Int32)>>('wooly_process_next_token');
+          ffi.Int32 Function(
+              ffi.Pointer<ffi.Void>, ffi.Int32)>>('wooly_process_next_token');
   late final _wooly_process_next_token = _wooly_process_next_tokenPtr
-      .asFunction<int Function(ffi.Pointer<ffi.Void>, int, int)>();
+      .asFunction<int Function(ffi.Pointer<ffi.Void>, int)>();
 
   int wooly_sample_next(
     ffi.Pointer<ffi.Void> llama_context_ptr,
@@ -666,6 +664,12 @@ final class wooly_gpt_params extends ffi.Struct {
   external double min_p;
 
   @ffi.Float()
+  external double xtc_probability;
+
+  @ffi.Float()
+  external double xtc_threshold;
+
+  @ffi.Float()
   external double tfs_z;
 
   @ffi.Float()
@@ -691,6 +695,18 @@ final class wooly_gpt_params extends ffi.Struct {
 
   @ffi.Float()
   external double penalty_present;
+
+  @ffi.Float()
+  external double dry_multiplier;
+
+  @ffi.Float()
+  external double dry_base;
+
+  @ffi.Int32()
+  external int dry_allowed_length;
+
+  @ffi.Int32()
+  external int dry_penalty_last_n;
 
   @ffi.Int32()
   external int mirostat;

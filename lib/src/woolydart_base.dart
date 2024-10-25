@@ -227,14 +227,9 @@ class LlamaModel {
   // it through the loaded model to compute everything necessary to sample
   // another token following it. This is a compute heavy function call.
   //
-  // The `position` parameter should specify the location of this token
-  // in the context. For example, if 100 tokens were processed in `processPrompt()`,
-  // and then a new token was sampled with `sampleNextToken()`, that token should
-  // be passed to this function with a position of 100.
-  //
   // The function returns `true` if it was successful and `false` on error.
-  bool processNextToken(Token nextToken, int position) {
-    final result = lib.wooly_process_next_token(_ctx, nextToken, position);
+  bool processNextToken(Token nextToken) {
+    final result = lib.wooly_process_next_token(_ctx, nextToken);
     if (result == 0) {
       return true;
     } else {
