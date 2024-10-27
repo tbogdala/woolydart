@@ -708,6 +708,11 @@ final class wooly_gpt_params extends ffi.Struct {
   @ffi.Int32()
   external int dry_penalty_last_n;
 
+  external ffi.Pointer<ffi.Pointer<ffi.Char>> dry_sequence_breakers;
+
+  @ffi.Int32()
+  external int dry_sequence_breakers_count;
+
   @ffi.Int32()
   external int mirostat;
 

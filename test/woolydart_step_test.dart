@@ -63,6 +63,11 @@ void main() {
     params.setAntiprompts([
       "<|end|>",
     ]);
+    params.dry_multiplier = 0.8;
+    params.dry_base = 1.75;
+    params.dry_allowed_length = 2;
+    params.dry_penalty_last_n = -1;
+    params.setDrySequenceBreakers(["\n", ":", "\"", "*"]);
 
     // do just the prompt processing and stop
     final (promptTokenCount, firstSampler) = llamaModel.processPrompt(params);

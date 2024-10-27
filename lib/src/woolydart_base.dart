@@ -467,6 +467,7 @@ extension GptParamsSimpleExtension on wooly_gpt_params {
     freePrompt();
     freeAntiprompts();
     freeGrammar();
+    freeDrySequenceBreakers();
   }
 
   // Frees the memory used by the prompt native string.
@@ -536,6 +537,40 @@ extension GptParamsSimpleExtension on wooly_gpt_params {
 
       antiprompts = antiPointers;
       antiprompt_count = newAntiprompts.length;
+    }
+  }
+
+  // Frees the memory used by the DRY sampler sequence breaker native strings
+  void freeDrySequenceBreakers() {
+    if (dry_sequence_breakers != nullptr) {
+      for (int sb = 0; sb < dry_sequence_breakers_count; sb++) {
+        malloc.free(dry_sequence_breakers[sb]);
+      }
+      malloc.free(dry_sequence_breakers);
+      dry_sequence_breakers = nullptr;
+      dry_sequence_breakers_count = 0;
+    }
+  }
+
+  // Sets the DRY sampler sequence breaking strings for the parameters taking care of the
+  // conversion to a C compatible set of character arrays.
+  void setDrySequenceBreakers(List<String> newSequenceBreakers) {
+    freeDrySequenceBreakers();
+
+    if (newSequenceBreakers.isNotEmpty) {
+      // allocate all the array of pointers.
+      final Pointer<Pointer<Char>> strPointers =
+          calloc.allocate(newSequenceBreakers.length * sizeOf<Pointer<Char>>());
+
+      // allocate each of the native strings
+      for (int sb = 0; sb < newSequenceBreakers.length; sb++) {
+        Pointer<Char> native =
+            newSequenceBreakers[sb].toNativeUtf8() as Pointer<Char>;
+        strPointers[sb] = native;
+      }
+
+      dry_sequence_breakers = strPointers;
+      dry_sequence_breakers_count = newSequenceBreakers.length;
     }
   }
 }
