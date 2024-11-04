@@ -462,9 +462,6 @@ final class wooly_predict_result extends ffi.Struct {
   external double t_end_ms;
 
   @ffi.Double()
-  external double t_load_ms;
-
-  @ffi.Double()
   external double t_p_eval_ms;
 
   @ffi.Double()

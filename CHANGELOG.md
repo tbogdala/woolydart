@@ -1,4 +1,11 @@
-## 0.2.0
+# Change log
+
+## v0.3.0
+
+- Sync'd changes with upstream woolycore.
+
+
+## v0.2.0
 
 - Added support for upstream woolycore's ability to step-by-step run inference. This includes methods like
     `processPrompt`, `sampleNextToken`, `checkEogAndAntiprompt`, `processNextToken`, `freeGptSampler`
@@ -6,6 +13,6 @@
     `freezePrompt`, `freezePromptWithPrediction`, `defrostFrozenState`, `freeFrozenState`
 - Added a new String? property called `loadedModelFilepath` to `LlamaModel` to track the last loaded model file.
 
-## 0.1.0
+## v0.1.0
 
 - Initial development version. Versioning hasn't started yet and all progress is on the `main` branch.

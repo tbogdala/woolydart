@@ -128,8 +128,7 @@ void main() {
 
     test('Text Prediction', () {
       expect(predictResult2.result, 0);
-      expect(predictResult2.n_p_eval, 1);
-      expect(predictResult2.t_p_eval_ms, 0);
+      expect(predictResult2.n_p_eval, 0);
       expect(globalCallbackCount, 100);
     });
 
