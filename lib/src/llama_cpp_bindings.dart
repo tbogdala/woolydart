@@ -94,6 +94,32 @@ class woolydart {
       wooly_process_prompt_results Function(
           wooly_gpt_params, ffi.Pointer<ffi.Void>, ffi.Pointer<ffi.Void>)>();
 
+  int wooly_process_additional_prompt(
+    ffi.Pointer<ffi.Void> llama_context_ptr,
+    ffi.Pointer<ffi.Void> llama_model_ptr,
+    ffi.Pointer<ffi.Void> sampler_ptr,
+    ffi.Pointer<ffi.Char> additional_prompt,
+  ) {
+    return _wooly_process_additional_prompt(
+      llama_context_ptr,
+      llama_model_ptr,
+      sampler_ptr,
+      additional_prompt,
+    );
+  }
+
+  late final _wooly_process_additional_promptPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int32 Function(
+              ffi.Pointer<ffi.Void>,
+              ffi.Pointer<ffi.Void>,
+              ffi.Pointer<ffi.Void>,
+              ffi.Pointer<ffi.Char>)>>('wooly_process_additional_prompt');
+  late final _wooly_process_additional_prompt =
+      _wooly_process_additional_promptPtr.asFunction<
+          int Function(ffi.Pointer<ffi.Void>, ffi.Pointer<ffi.Void>,
+              ffi.Pointer<ffi.Void>, ffi.Pointer<ffi.Char>)>();
+
   void wooly_free_sampler(
     ffi.Pointer<ffi.Void> sampler_ptr,
   ) {

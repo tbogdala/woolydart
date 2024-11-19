@@ -143,21 +143,23 @@ void main() {
 
     print("\n~~~ ---- ~~~~\n\n");
 
-    // change prediction parameters so that we can see a change when using
-    // the frozen state made after ingesting prompt.
-    params.seed = 1337;
-    params.temp = 3.1;
-    params.top_k = 40;
-    params.top_p = 0.9;
-    params.min_p = 0.04;
-    params.penalty_repeat = 1.04;
-
     // take the state from the frozen prompt above and restore it. this *does*
     // make a new sampler and we have to use that in the next sampling loop.
     final (defrostedTokenCount, secondSampler) =
         llamaModel.defrostFrozenState(params, frozenPrompt);
     test('defrost prompt test', () {
       expect(defrostedTokenCount, promptTokenCount);
+    });
+
+    // inject a little more prompt in just to make it different and test
+    // the ability to add more prompt to ingest. This should produce a
+    // distinctly different result than the first prediction.
+    final newPromptText =
+        "Do you have a suggestion for genre?<|end|>\n<|user|>\nMake it like a Pixar movie script, but with those two authors!<|end|>\n<|assistant|>\n";
+    final newPromptTokenCount =
+        llamaModel.processAdditionalPrompt(secondSampler, newPromptText);
+    test('additional prompt test', () {
+      expect(newPromptTokenCount > 0, true);
     });
 
     // reset our prediction list and do another prediction cycle.
@@ -206,15 +208,9 @@ void main() {
 
     print("\n~~~ ---- ~~~~\n\n");
 
-    // restore the original parameters
-    params.seed = 42;
-    params.temp = 0.1;
-    params.top_k = 1;
-    params.top_p = 1.0;
-    params.min_p = 0.1;
-    params.penalty_repeat = 1.1;
-
-    // defrost the state we saved with our initial predictions
+    // defrost the state we saved with our initial predictions.
+    // this should mean that the additional prompt string we added above will no longer
+    // be there and the prediction can continue as it would have initially.
     final (defrostedPredictionTokenCount, thirdSampler) =
         llamaModel.defrostFrozenState(params, frozenPrediction);
     test('defrost prompt with prediction test', () {

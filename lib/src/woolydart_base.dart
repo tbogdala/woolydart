@@ -203,6 +203,18 @@ class LlamaModel {
     return (results.result, GptSampler(results.gpt_sampler));
   }
 
+  // Takes the sampler that was returned from a previous `processPrompt()` call
+  // and applies more prompt text, updating the sampler state. The returned value
+  // is the number of tokens added or a negative number on error.
+  int processAdditionalPrompt(GptSampler gptSampler, String additionalPrompt) {
+    final textPtr = additionalPrompt.toNativeUtf8() as Pointer<Char>;
+    final retValue = lib.wooly_process_additional_prompt(
+        _ctx, _model, gptSampler._samplerPtr, textPtr);
+    malloc.free(textPtr);
+
+    return retValue;
+  }
+
   // Takes the void pointer to the sampler returned with `processPrompt()` and
   // ONLY samples the next token, which is returned.
   Token sampleNextToken(GptSampler gptSampler) {

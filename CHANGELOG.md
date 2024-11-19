@@ -3,7 +3,7 @@
 ## v0.3.0
 
 - Sync'd changes with upstream woolycore.
-
+- Added `processAdditionalPrompt` to add more prompt tokens before generating text.
 
 ## v0.2.0
 
