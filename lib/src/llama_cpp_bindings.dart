@@ -693,9 +693,6 @@ final class wooly_gpt_params extends ffi.Struct {
   external double xtc_threshold;
 
   @ffi.Float()
-  external double tfs_z;
-
-  @ffi.Float()
   external double typical_p;
 
   @ffi.Float()
