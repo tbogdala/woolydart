@@ -351,7 +351,7 @@ class woolydart {
       _wooly_llama_n_embdPtr.asFunction<int Function(ffi.Pointer<ffi.Void>)>();
 
   int wooly_llama_tokenize(
-    ffi.Pointer<ffi.Void> llama_model_ptr,
+    ffi.Pointer<ffi.Void> llama_ctx_ptr,
     ffi.Pointer<ffi.Char> text,
     bool add_special,
     bool parse_special,
@@ -359,7 +359,7 @@ class woolydart {
     int out_tokens_size,
   ) {
     return _wooly_llama_tokenize(
-      llama_model_ptr,
+      llama_ctx_ptr,
       text,
       add_special,
       parse_special,
@@ -741,9 +741,6 @@ final class wooly_gpt_params extends ffi.Struct {
 
   @ffi.Float()
   external double mirostat_eta;
-
-  @ffi.Bool()
-  external bool penalize_nl;
 
   external ffi.Pointer<ffi.Char> grammar;
 }

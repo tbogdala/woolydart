@@ -315,7 +315,7 @@ class LlamaModel {
   ) {
     final textPtr = textPrompt.toNativeUtf8() as Pointer<Char>;
     final tokenCount = lib.wooly_llama_tokenize(
-        _model, textPtr, addSpecial, parseSpecial, nullptr, 0);
+        _ctx, textPtr, addSpecial, parseSpecial, nullptr, 0);
 
     malloc.free(textPtr);
     return tokenCount;
@@ -336,7 +336,7 @@ class LlamaModel {
     final Pointer<Int32> outTokensBuffer = malloc<Int32>(outTokensBufferLen);
 
     // get the tokens
-    final tokenCount = lib.wooly_llama_tokenize(_model, textPtr, addSpecial,
+    final tokenCount = lib.wooly_llama_tokenize(_ctx, textPtr, addSpecial,
         parseSpecial, outTokensBuffer, outTokensBufferLen);
 
     // convert it to a Dart compatible data type that is warm and inviting...
