@@ -4,6 +4,13 @@ import 'dart:math';
 import 'package:ffi/ffi.dart';
 import 'package:woolydart/src/llama_cpp_bindings.dart';
 
+class ChatMessage {
+  String role;
+  String content;
+
+  ChatMessage(this.role, this.content);
+}
+
 enum LlamaPoolingType {
   unspecified(-1),
   none(0),
@@ -35,7 +42,7 @@ typedef Embedding = List<double>;
 // this is just a basic class wrapper around a void pointer just for better
 // clarity in the API.
 class FrozenState {
-  final Pointer<Void> _cachedState;
+  final Pointer<wooly_prompt_cache_t> _cachedState;
   bool isAlive = true;
 
   FrozenState(this._cachedState);
@@ -44,7 +51,7 @@ class FrozenState {
 // this is just a basic class wrapper around a void pointer just for better
 // clarity in the API.
 class GptSampler {
-  final Pointer<Void> _samplerPtr;
+  final Pointer<wooly_sampler_t> _samplerPtr;
   bool isAlive = true;
 
   GptSampler(this._samplerPtr);
@@ -54,13 +61,13 @@ class LlamaModel {
   late woolydart lib;
 
   // internal handle to the context
-  Pointer<Void> _ctx = nullptr;
+  Pointer<wooly_llama_context_t> _ctx = nullptr;
 
   // internal handle to the loaded model
-  Pointer<Void> _model = nullptr;
+  Pointer<wooly_llama_model_t> _model = nullptr;
 
   // internal handle to prompt cache from last prediction
-  Pointer<Void> _lastPromptCache = nullptr;
+  Pointer<wooly_prompt_cache_t> _lastPromptCache = nullptr;
 
   // the size of the context used to load the model
   int _loadedContextLength = 0;
@@ -159,6 +166,66 @@ class LlamaModel {
   // to pull initial values from.
   wooly_gpt_params getTextGenParams() {
     return lib.wooly_new_gpt_params();
+  }
+
+  // Constructs a prompt from a list of chat messages and applies a chat template
+  // .
+  (String, int) makePromptFromMessages(
+      List<ChatMessage> messages, String? templateOverride) {
+    // handle empty lists
+    if (messages.isEmpty) {
+      return ("", 0);
+    }
+
+    var prompt = "";
+    var numProcessed = 0;
+
+    // this is the compatible message log we build out to send over FFI
+    final messageLog = calloc<wooly_chat_message>(messages.length);
+
+    // this is the template name override if supplied
+    Pointer<Char> templateOverrideNative;
+
+    if (templateOverride == null) {
+      templateOverrideNative = nullptr;
+    } else {
+      templateOverrideNative = templateOverride.toNativeUtf8() as Pointer<Char>;
+    }
+    try {
+      // Populate the allocated memory with data from your Dart list
+      for (int i = 0; i < messages.length; i++) {
+        final message = messages[i];
+        messageLog[i].role = message.role.toNativeUtf8() as Pointer<Char>;
+        messageLog[i].content = message.content.toNativeUtf8() as Pointer<Char>;
+      }
+
+      // build a prompt output buffer
+      final outputTextSize = _loadedContextLength * 4 * 10;
+      final outputText = calloc.allocate(outputTextSize) as Pointer<Char>;
+
+      // try to apply the chat template to the message log
+      numProcessed = lib.wooly_apply_chat_template(
+          _model,
+          templateOverrideNative,
+          messageLog,
+          messages.length,
+          outputText,
+          outputTextSize);
+
+      prompt = (outputText as Pointer<Utf8>).toDartString();
+    } finally {
+      // Free the allocated memory
+      for (int i = 0; i < messages.length; i++) {
+        calloc.free(messageLog[i].role);
+        calloc.free(messageLog[i].content);
+      }
+      if (templateOverrideNative != nullptr) {
+        calloc.free(templateOverrideNative);
+      }
+      calloc.free(messageLog);
+    }
+
+    return (prompt, numProcessed);
   }
 
   // Runs text inferrence on the loaded model to predict text based on the set

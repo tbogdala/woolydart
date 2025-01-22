@@ -46,8 +46,8 @@ class woolydart {
           wooly_llama_model_params, wooly_llama_context_params, bool)>();
 
   void wooly_free_model(
-    ffi.Pointer<ffi.Void> llama_context_ptr,
-    ffi.Pointer<ffi.Void> llama_model_ptr,
+    ffi.Pointer<wooly_llama_context_t> llama_context_ptr,
+    ffi.Pointer<wooly_llama_model_t> llama_model_ptr,
   ) {
     return _wooly_free_model(
       llama_context_ptr,
@@ -57,10 +57,11 @@ class woolydart {
 
   late final _wooly_free_modelPtr = _lookup<
       ffi.NativeFunction<
-          ffi.Void Function(ffi.Pointer<ffi.Void>,
-              ffi.Pointer<ffi.Void>)>>('wooly_free_model');
+          ffi.Void Function(ffi.Pointer<wooly_llama_context_t>,
+              ffi.Pointer<wooly_llama_model_t>)>>('wooly_free_model');
   late final _wooly_free_model = _wooly_free_modelPtr.asFunction<
-      void Function(ffi.Pointer<ffi.Void>, ffi.Pointer<ffi.Void>)>();
+      void Function(ffi.Pointer<wooly_llama_context_t>,
+          ffi.Pointer<wooly_llama_model_t>)>();
 
   wooly_gpt_params wooly_new_gpt_params() {
     return _wooly_new_gpt_params();
@@ -74,8 +75,8 @@ class woolydart {
 
   wooly_process_prompt_results wooly_process_prompt(
     wooly_gpt_params simple_params,
-    ffi.Pointer<ffi.Void> llama_context_ptr,
-    ffi.Pointer<ffi.Void> llama_model_ptr,
+    ffi.Pointer<wooly_llama_context_t> llama_context_ptr,
+    ffi.Pointer<wooly_llama_model_t> llama_model_ptr,
   ) {
     return _wooly_process_prompt(
       simple_params,
@@ -88,16 +89,18 @@ class woolydart {
       ffi.NativeFunction<
           wooly_process_prompt_results Function(
               wooly_gpt_params,
-              ffi.Pointer<ffi.Void>,
-              ffi.Pointer<ffi.Void>)>>('wooly_process_prompt');
+              ffi.Pointer<wooly_llama_context_t>,
+              ffi.Pointer<wooly_llama_model_t>)>>('wooly_process_prompt');
   late final _wooly_process_prompt = _wooly_process_promptPtr.asFunction<
       wooly_process_prompt_results Function(
-          wooly_gpt_params, ffi.Pointer<ffi.Void>, ffi.Pointer<ffi.Void>)>();
+          wooly_gpt_params,
+          ffi.Pointer<wooly_llama_context_t>,
+          ffi.Pointer<wooly_llama_model_t>)>();
 
   int wooly_process_additional_prompt(
-    ffi.Pointer<ffi.Void> llama_context_ptr,
-    ffi.Pointer<ffi.Void> llama_model_ptr,
-    ffi.Pointer<ffi.Void> sampler_ptr,
+    ffi.Pointer<wooly_llama_context_t> llama_context_ptr,
+    ffi.Pointer<wooly_llama_model_t> llama_model_ptr,
+    ffi.Pointer<wooly_sampler_t> sampler_ptr,
     ffi.Pointer<ffi.Char> additional_prompt,
   ) {
     return _wooly_process_additional_prompt(
@@ -111,31 +114,34 @@ class woolydart {
   late final _wooly_process_additional_promptPtr = _lookup<
       ffi.NativeFunction<
           ffi.Int32 Function(
-              ffi.Pointer<ffi.Void>,
-              ffi.Pointer<ffi.Void>,
-              ffi.Pointer<ffi.Void>,
+              ffi.Pointer<wooly_llama_context_t>,
+              ffi.Pointer<wooly_llama_model_t>,
+              ffi.Pointer<wooly_sampler_t>,
               ffi.Pointer<ffi.Char>)>>('wooly_process_additional_prompt');
   late final _wooly_process_additional_prompt =
       _wooly_process_additional_promptPtr.asFunction<
-          int Function(ffi.Pointer<ffi.Void>, ffi.Pointer<ffi.Void>,
-              ffi.Pointer<ffi.Void>, ffi.Pointer<ffi.Char>)>();
+          int Function(
+              ffi.Pointer<wooly_llama_context_t>,
+              ffi.Pointer<wooly_llama_model_t>,
+              ffi.Pointer<wooly_sampler_t>,
+              ffi.Pointer<ffi.Char>)>();
 
   void wooly_free_sampler(
-    ffi.Pointer<ffi.Void> sampler_ptr,
+    ffi.Pointer<wooly_sampler_t> sampler_ptr,
   ) {
     return _wooly_free_sampler(
       sampler_ptr,
     );
   }
 
-  late final _wooly_free_samplerPtr =
-      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Pointer<ffi.Void>)>>(
-          'wooly_free_sampler');
-  late final _wooly_free_sampler =
-      _wooly_free_samplerPtr.asFunction<void Function(ffi.Pointer<ffi.Void>)>();
+  late final _wooly_free_samplerPtr = _lookup<
+          ffi.NativeFunction<ffi.Void Function(ffi.Pointer<wooly_sampler_t>)>>(
+      'wooly_free_sampler');
+  late final _wooly_free_sampler = _wooly_free_samplerPtr
+      .asFunction<void Function(ffi.Pointer<wooly_sampler_t>)>();
 
   int wooly_process_next_token(
-    ffi.Pointer<ffi.Void> llama_context_ptr,
+    ffi.Pointer<wooly_llama_context_t> llama_context_ptr,
     int next_token,
   ) {
     return _wooly_process_next_token(
@@ -146,14 +152,14 @@ class woolydart {
 
   late final _wooly_process_next_tokenPtr = _lookup<
       ffi.NativeFunction<
-          ffi.Int32 Function(
-              ffi.Pointer<ffi.Void>, ffi.Int32)>>('wooly_process_next_token');
+          ffi.Int32 Function(ffi.Pointer<wooly_llama_context_t>,
+              ffi.Int32)>>('wooly_process_next_token');
   late final _wooly_process_next_token = _wooly_process_next_tokenPtr
-      .asFunction<int Function(ffi.Pointer<ffi.Void>, int)>();
+      .asFunction<int Function(ffi.Pointer<wooly_llama_context_t>, int)>();
 
   int wooly_sample_next(
-    ffi.Pointer<ffi.Void> llama_context_ptr,
-    ffi.Pointer<ffi.Void> sampler_ptr,
+    ffi.Pointer<wooly_llama_context_t> llama_context_ptr,
+    ffi.Pointer<wooly_sampler_t> sampler_ptr,
   ) {
     return _wooly_sample_next(
       llama_context_ptr,
@@ -163,16 +169,17 @@ class woolydart {
 
   late final _wooly_sample_nextPtr = _lookup<
       ffi.NativeFunction<
-          ffi.Int32 Function(ffi.Pointer<ffi.Void>,
-              ffi.Pointer<ffi.Void>)>>('wooly_sample_next');
-  late final _wooly_sample_next = _wooly_sample_nextPtr
-      .asFunction<int Function(ffi.Pointer<ffi.Void>, ffi.Pointer<ffi.Void>)>();
+          ffi.Int32 Function(ffi.Pointer<wooly_llama_context_t>,
+              ffi.Pointer<wooly_sampler_t>)>>('wooly_sample_next');
+  late final _wooly_sample_next = _wooly_sample_nextPtr.asFunction<
+      int Function(
+          ffi.Pointer<wooly_llama_context_t>, ffi.Pointer<wooly_sampler_t>)>();
 
   int wooly_check_eog_and_antiprompt(
     wooly_gpt_params simple_params,
-    ffi.Pointer<ffi.Void> llama_context_ptr,
-    ffi.Pointer<ffi.Void> llama_model_ptr,
-    ffi.Pointer<ffi.Void> sampler_ptr,
+    ffi.Pointer<wooly_llama_context_t> llama_context_ptr,
+    ffi.Pointer<wooly_llama_model_t> llama_model_ptr,
+    ffi.Pointer<wooly_sampler_t> sampler_ptr,
   ) {
     return _wooly_check_eog_and_antiprompt(
       simple_params,
@@ -186,18 +193,21 @@ class woolydart {
       ffi.NativeFunction<
           ffi.Int32 Function(
               wooly_gpt_params,
-              ffi.Pointer<ffi.Void>,
-              ffi.Pointer<ffi.Void>,
-              ffi.Pointer<ffi.Void>)>>('wooly_check_eog_and_antiprompt');
+              ffi.Pointer<wooly_llama_context_t>,
+              ffi.Pointer<wooly_llama_model_t>,
+              ffi.Pointer<wooly_sampler_t>)>>('wooly_check_eog_and_antiprompt');
   late final _wooly_check_eog_and_antiprompt =
       _wooly_check_eog_and_antipromptPtr.asFunction<
-          int Function(wooly_gpt_params, ffi.Pointer<ffi.Void>,
-              ffi.Pointer<ffi.Void>, ffi.Pointer<ffi.Void>)>();
+          int Function(
+              wooly_gpt_params,
+              ffi.Pointer<wooly_llama_context_t>,
+              ffi.Pointer<wooly_llama_model_t>,
+              ffi.Pointer<wooly_sampler_t>)>();
 
-  ffi.Pointer<ffi.Void> wooly_freeze_prediction_state(
+  ffi.Pointer<wooly_prompt_cache_t> wooly_freeze_prediction_state(
     wooly_gpt_params simple_params,
-    ffi.Pointer<ffi.Void> llama_context_ptr,
-    ffi.Pointer<ffi.Void> llama_model_ptr,
+    ffi.Pointer<wooly_llama_context_t> llama_context_ptr,
+    ffi.Pointer<wooly_llama_model_t> llama_model_ptr,
     ffi.Pointer<ffi.Int32> predicted_tokens,
     int predicted_token_count,
   ) {
@@ -212,26 +222,26 @@ class woolydart {
 
   late final _wooly_freeze_prediction_statePtr = _lookup<
       ffi.NativeFunction<
-          ffi.Pointer<ffi.Void> Function(
+          ffi.Pointer<wooly_prompt_cache_t> Function(
               wooly_gpt_params,
-              ffi.Pointer<ffi.Void>,
-              ffi.Pointer<ffi.Void>,
+              ffi.Pointer<wooly_llama_context_t>,
+              ffi.Pointer<wooly_llama_model_t>,
               ffi.Pointer<ffi.Int32>,
               ffi.Int64)>>('wooly_freeze_prediction_state');
   late final _wooly_freeze_prediction_state =
       _wooly_freeze_prediction_statePtr.asFunction<
-          ffi.Pointer<ffi.Void> Function(
+          ffi.Pointer<wooly_prompt_cache_t> Function(
               wooly_gpt_params,
-              ffi.Pointer<ffi.Void>,
-              ffi.Pointer<ffi.Void>,
+              ffi.Pointer<wooly_llama_context_t>,
+              ffi.Pointer<wooly_llama_model_t>,
               ffi.Pointer<ffi.Int32>,
               int)>();
 
   wooly_process_prompt_results wooly_defrost_prediction_state(
     wooly_gpt_params simple_params,
-    ffi.Pointer<ffi.Void> llama_context_ptr,
-    ffi.Pointer<ffi.Void> llama_model_ptr,
-    ffi.Pointer<ffi.Void> prompt_cache_ptr,
+    ffi.Pointer<wooly_llama_context_t> llama_context_ptr,
+    ffi.Pointer<wooly_llama_model_t> llama_model_ptr,
+    ffi.Pointer<wooly_prompt_cache_t> prompt_cache_ptr,
   ) {
     return _wooly_defrost_prediction_state(
       simple_params,
@@ -242,28 +252,29 @@ class woolydart {
   }
 
   late final _wooly_defrost_prediction_statePtr = _lookup<
-      ffi.NativeFunction<
-          wooly_process_prompt_results Function(
-              wooly_gpt_params,
-              ffi.Pointer<ffi.Void>,
-              ffi.Pointer<ffi.Void>,
-              ffi.Pointer<ffi.Void>)>>('wooly_defrost_prediction_state');
+          ffi.NativeFunction<
+              wooly_process_prompt_results Function(
+                  wooly_gpt_params,
+                  ffi.Pointer<wooly_llama_context_t>,
+                  ffi.Pointer<wooly_llama_model_t>,
+                  ffi.Pointer<wooly_prompt_cache_t>)>>(
+      'wooly_defrost_prediction_state');
   late final _wooly_defrost_prediction_state =
       _wooly_defrost_prediction_statePtr.asFunction<
           wooly_process_prompt_results Function(
               wooly_gpt_params,
-              ffi.Pointer<ffi.Void>,
-              ffi.Pointer<ffi.Void>,
-              ffi.Pointer<ffi.Void>)>();
+              ffi.Pointer<wooly_llama_context_t>,
+              ffi.Pointer<wooly_llama_model_t>,
+              ffi.Pointer<wooly_prompt_cache_t>)>();
 
   wooly_predict_result wooly_predict(
     wooly_gpt_params simple_params,
-    ffi.Pointer<ffi.Void> llama_context_ptr,
-    ffi.Pointer<ffi.Void> llama_model_ptr,
+    ffi.Pointer<wooly_llama_context_t> llama_context_ptr,
+    ffi.Pointer<wooly_llama_model_t> llama_model_ptr,
     bool include_specials,
     ffi.Pointer<ffi.Char> out_result,
     int out_result_size,
-    ffi.Pointer<ffi.Void> prompt_cache_ptr,
+    ffi.Pointer<wooly_prompt_cache_t> prompt_cache_ptr,
     wooly_token_update_callback token_cb,
   ) {
     return _wooly_predict(
@@ -282,37 +293,38 @@ class woolydart {
       ffi.NativeFunction<
           wooly_predict_result Function(
               wooly_gpt_params,
-              ffi.Pointer<ffi.Void>,
-              ffi.Pointer<ffi.Void>,
+              ffi.Pointer<wooly_llama_context_t>,
+              ffi.Pointer<wooly_llama_model_t>,
               ffi.Bool,
               ffi.Pointer<ffi.Char>,
               ffi.Int64,
-              ffi.Pointer<ffi.Void>,
+              ffi.Pointer<wooly_prompt_cache_t>,
               wooly_token_update_callback)>>('wooly_predict');
   late final _wooly_predict = _wooly_predictPtr.asFunction<
       wooly_predict_result Function(
           wooly_gpt_params,
-          ffi.Pointer<ffi.Void>,
-          ffi.Pointer<ffi.Void>,
+          ffi.Pointer<wooly_llama_context_t>,
+          ffi.Pointer<wooly_llama_model_t>,
           bool,
           ffi.Pointer<ffi.Char>,
           int,
-          ffi.Pointer<ffi.Void>,
+          ffi.Pointer<wooly_prompt_cache_t>,
           wooly_token_update_callback)>();
 
   void wooly_free_prompt_cache(
-    ffi.Pointer<ffi.Void> prompt_cache_ptr,
+    ffi.Pointer<wooly_prompt_cache_t> prompt_cache_ptr,
   ) {
     return _wooly_free_prompt_cache(
       prompt_cache_ptr,
     );
   }
 
-  late final _wooly_free_prompt_cachePtr =
-      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Pointer<ffi.Void>)>>(
-          'wooly_free_prompt_cache');
+  late final _wooly_free_prompt_cachePtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Void Function(
+              ffi.Pointer<wooly_prompt_cache_t>)>>('wooly_free_prompt_cache');
   late final _wooly_free_prompt_cache = _wooly_free_prompt_cachePtr
-      .asFunction<void Function(ffi.Pointer<ffi.Void>)>();
+      .asFunction<void Function(ffi.Pointer<wooly_prompt_cache_t>)>();
 
   wooly_llama_model_params wooly_get_default_llama_model_params() {
     return _wooly_get_default_llama_model_params();
@@ -337,21 +349,22 @@ class woolydart {
           .asFunction<wooly_llama_context_params Function()>();
 
   int wooly_llama_n_embd(
-    ffi.Pointer<ffi.Void> llama_model_ptr,
+    ffi.Pointer<wooly_llama_model_t> llama_model_ptr,
   ) {
     return _wooly_llama_n_embd(
       llama_model_ptr,
     );
   }
 
-  late final _wooly_llama_n_embdPtr =
-      _lookup<ffi.NativeFunction<ffi.Int32 Function(ffi.Pointer<ffi.Void>)>>(
-          'wooly_llama_n_embd');
-  late final _wooly_llama_n_embd =
-      _wooly_llama_n_embdPtr.asFunction<int Function(ffi.Pointer<ffi.Void>)>();
+  late final _wooly_llama_n_embdPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int32 Function(
+              ffi.Pointer<wooly_llama_model_t>)>>('wooly_llama_n_embd');
+  late final _wooly_llama_n_embd = _wooly_llama_n_embdPtr
+      .asFunction<int Function(ffi.Pointer<wooly_llama_model_t>)>();
 
   int wooly_llama_tokenize(
-    ffi.Pointer<ffi.Void> llama_ctx_ptr,
+    ffi.Pointer<wooly_llama_context_t> llama_ctx_ptr,
     ffi.Pointer<ffi.Char> text,
     bool add_special,
     bool parse_special,
@@ -371,18 +384,18 @@ class woolydart {
   late final _wooly_llama_tokenizePtr = _lookup<
       ffi.NativeFunction<
           ffi.Int64 Function(
-              ffi.Pointer<ffi.Void>,
+              ffi.Pointer<wooly_llama_context_t>,
               ffi.Pointer<ffi.Char>,
               ffi.Bool,
               ffi.Bool,
               ffi.Pointer<ffi.Int32>,
               ffi.Int64)>>('wooly_llama_tokenize');
   late final _wooly_llama_tokenize = _wooly_llama_tokenizePtr.asFunction<
-      int Function(ffi.Pointer<ffi.Void>, ffi.Pointer<ffi.Char>, bool, bool,
-          ffi.Pointer<ffi.Int32>, int)>();
+      int Function(ffi.Pointer<wooly_llama_context_t>, ffi.Pointer<ffi.Char>,
+          bool, bool, ffi.Pointer<ffi.Int32>, int)>();
 
   int wooly_llama_detokenize(
-    ffi.Pointer<ffi.Void> llama_context_ptr,
+    ffi.Pointer<wooly_llama_context_t> llama_context_ptr,
     bool render_specials,
     ffi.Pointer<ffi.Int32> tokens,
     int tokens_size,
@@ -402,19 +415,71 @@ class woolydart {
   late final _wooly_llama_detokenizePtr = _lookup<
       ffi.NativeFunction<
           ffi.Int64 Function(
-              ffi.Pointer<ffi.Void>,
+              ffi.Pointer<wooly_llama_context_t>,
               ffi.Bool,
               ffi.Pointer<ffi.Int32>,
               ffi.Int64,
               ffi.Pointer<ffi.Char>,
               ffi.Int64)>>('wooly_llama_detokenize');
   late final _wooly_llama_detokenize = _wooly_llama_detokenizePtr.asFunction<
-      int Function(ffi.Pointer<ffi.Void>, bool, ffi.Pointer<ffi.Int32>, int,
-          ffi.Pointer<ffi.Char>, int)>();
+      int Function(ffi.Pointer<wooly_llama_context_t>, bool,
+          ffi.Pointer<ffi.Int32>, int, ffi.Pointer<ffi.Char>, int)>();
+
+  bool wooly_has_chat_template(
+    ffi.Pointer<wooly_llama_model_t> llama_model_ptr,
+  ) {
+    return _wooly_has_chat_template(
+      llama_model_ptr,
+    );
+  }
+
+  late final _wooly_has_chat_templatePtr = _lookup<
+          ffi
+          .NativeFunction<ffi.Bool Function(ffi.Pointer<wooly_llama_model_t>)>>(
+      'wooly_has_chat_template');
+  late final _wooly_has_chat_template = _wooly_has_chat_templatePtr
+      .asFunction<bool Function(ffi.Pointer<wooly_llama_model_t>)>();
+
+  int wooly_apply_chat_template(
+    ffi.Pointer<wooly_llama_model_t> llama_model_ptr,
+    ffi.Pointer<ffi.Char> chat_template,
+    ffi.Pointer<wooly_chat_message> chat_messages,
+    int chat_message_count,
+    ffi.Pointer<ffi.Char> out_result,
+    int out_result_size,
+  ) {
+    return _wooly_apply_chat_template(
+      llama_model_ptr,
+      chat_template,
+      chat_messages,
+      chat_message_count,
+      out_result,
+      out_result_size,
+    );
+  }
+
+  late final _wooly_apply_chat_templatePtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int64 Function(
+              ffi.Pointer<wooly_llama_model_t>,
+              ffi.Pointer<ffi.Char>,
+              ffi.Pointer<wooly_chat_message>,
+              ffi.Int64,
+              ffi.Pointer<ffi.Char>,
+              ffi.Int64)>>('wooly_apply_chat_template');
+  late final _wooly_apply_chat_template =
+      _wooly_apply_chat_templatePtr.asFunction<
+          int Function(
+              ffi.Pointer<wooly_llama_model_t>,
+              ffi.Pointer<ffi.Char>,
+              ffi.Pointer<wooly_chat_message>,
+              int,
+              ffi.Pointer<ffi.Char>,
+              int)>();
 
   int wooly_llama_make_embeddings(
-    ffi.Pointer<ffi.Void> llama_model_ptr,
-    ffi.Pointer<ffi.Void> llama_context_ptr,
+    ffi.Pointer<wooly_llama_model_t> llama_model_ptr,
+    ffi.Pointer<wooly_llama_context_t> llama_context_ptr,
     int batch_size,
     int pooling_type,
     int embd_normalize,
@@ -441,8 +506,8 @@ class woolydart {
   late final _wooly_llama_make_embeddingsPtr = _lookup<
       ffi.NativeFunction<
           ffi.Int64 Function(
-              ffi.Pointer<ffi.Void>,
-              ffi.Pointer<ffi.Void>,
+              ffi.Pointer<wooly_llama_model_t>,
+              ffi.Pointer<wooly_llama_context_t>,
               ffi.Int32,
               ffi.Int32,
               ffi.Int32,
@@ -454,8 +519,8 @@ class woolydart {
   late final _wooly_llama_make_embeddings =
       _wooly_llama_make_embeddingsPtr.asFunction<
           int Function(
-              ffi.Pointer<ffi.Void>,
-              ffi.Pointer<ffi.Void>,
+              ffi.Pointer<wooly_llama_model_t>,
+              ffi.Pointer<wooly_llama_context_t>,
               int,
               int,
               int,
@@ -466,20 +531,37 @@ class woolydart {
               int)>();
 }
 
-final class wooly_load_model_result extends ffi.Struct {
-  external ffi.Pointer<ffi.Void> model;
+final class wooly_llama_context_s extends ffi.Opaque {}
 
-  external ffi.Pointer<ffi.Void> ctx;
+final class wooly_llama_model_s extends ffi.Opaque {}
+
+final class wooly_sampler_s extends ffi.Opaque {}
+
+final class wooly_prompt_cache_s extends ffi.Opaque {}
+
+final class wooly_chat_message extends ffi.Struct {
+  external ffi.Pointer<ffi.Char> role;
+
+  external ffi.Pointer<ffi.Char> content;
+}
+
+final class wooly_load_model_result extends ffi.Struct {
+  external ffi.Pointer<wooly_llama_model_t> model;
+
+  external ffi.Pointer<wooly_llama_context_t> ctx;
 
   @ffi.Uint32()
   external int context_length;
 }
 
+typedef wooly_llama_model_t = wooly_llama_model_s;
+typedef wooly_llama_context_t = wooly_llama_context_s;
+
 final class wooly_predict_result extends ffi.Struct {
   @ffi.Int32()
   external int result;
 
-  external ffi.Pointer<ffi.Void> prompt_cache;
+  external ffi.Pointer<wooly_prompt_cache_t> prompt_cache;
 
   @ffi.Double()
   external double t_start_ms;
@@ -500,12 +582,16 @@ final class wooly_predict_result extends ffi.Struct {
   external int n_eval;
 }
 
+typedef wooly_prompt_cache_t = wooly_prompt_cache_s;
+
 final class wooly_process_prompt_results extends ffi.Struct {
   @ffi.Int32()
   external int result;
 
-  external ffi.Pointer<ffi.Void> gpt_sampler;
+  external ffi.Pointer<wooly_sampler_t> gpt_sampler;
 }
+
+typedef wooly_sampler_t = wooly_sampler_s;
 
 final class wooly_llama_model_params extends ffi.Struct {
   @ffi.Int32()

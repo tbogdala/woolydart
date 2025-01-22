@@ -3,6 +3,7 @@
 ## v0.4.0
 
 - Sync'd changes with upstream woolycore.
+- Added `makePromptFromMessages()` which builds a prompt out of a List of `ChatMessage` objects.
 
 
 ## v0.3.0

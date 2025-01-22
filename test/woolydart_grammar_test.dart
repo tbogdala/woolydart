@@ -58,11 +58,18 @@ void main() {
     params.penalty_last_n = 512;
     params.flash_attn = true;
     params.n_batch = 128;
-    params.setPrompt(
-        "<|user|>\nReturn a JSON object that describes an object in a fictional Dark Souls game. The returned JSON object should have 'Title' and 'Description' fields that define the item in the game. Make sure to write the item lore in the style of Fromsoft and thier Dark Souls series of games: there should be over-the-top naming of fantastically gross monsters and tragic historical events from the world, all with a very nihilistic feel.<|end|>\n<|assistant|>\n");
-    params.setAntiprompts([
-      "<|end|>",
-    ]);
+
+    // use the built in template for the model to determine the prompt formatting
+    // by building a list of `ChatMessage` objects.
+    var messages = [
+      ChatMessage("system",
+          "You are a skilled creative writer working on video game assets."),
+      ChatMessage("user",
+          "Return a JSON object that describes an object in a fictional Dark Souls game. The returned JSON object should have 'Title' and 'Description' fields that define the item in the game. Make sure to write the item lore in the style of Fromsoft and thier Dark Souls series of games: there should be over-the-top naming of fantastically gross monsters and tragic historical events from the world, all with a very nihilistic feel.")
+    ];
+    final promptResult = llamaModel.makePromptFromMessages(messages, null);
+    //print(format("DEBUG:\n{}\n\n", promptResult.$1));
+    params.setPrompt(promptResult.$1);
 
     // now we load the grammar from the llama.cpp project
     File grammarFile = File('src/woolycore/llama.cpp/grammars/json.gbnf');
@@ -72,8 +79,6 @@ void main() {
     test('Parameter creation test', () {
       expect(params, isNotNull);
       expect(params.prompt, isNotNull);
-      expect(params.antiprompts, isNotNull);
-      expect(params.antiprompt_count, equals(1));
     });
 
     var (predictResult, outputString) = llamaModel.predictText(params, nullptr);
