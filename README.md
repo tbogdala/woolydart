@@ -23,6 +23,9 @@ MIT licensed, like the core upstream `llama.cpp` it wraps. See `LICENSE` for det
 * Ability to cache the processed prompt data in memory so that it can be reused to speed up regeneration using 
   the exact same prompt. Additionally, the processed prompt and predicted tokens can cache the model state after 
   prediction as well so that it may be resumed quickly.
+* Tokenize text or just get the number of tokens for a given text string.
+* Generate embeddings using models such as `nomic-ai/nomic-embed-text-v1.5-GGUF` on HuggingFace in a batched process.
+* Automatic formatted prompt string construction is supported for GGUF models with embedded chat templates.
 
 
 ## Build notes
