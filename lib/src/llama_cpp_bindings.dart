@@ -443,6 +443,7 @@ class woolydart {
   int wooly_apply_chat_template(
     ffi.Pointer<wooly_llama_model_t> llama_model_ptr,
     ffi.Pointer<ffi.Char> chat_template,
+    bool include_assistant,
     ffi.Pointer<wooly_chat_message> chat_messages,
     int chat_message_count,
     ffi.Pointer<ffi.Char> out_result,
@@ -451,6 +452,7 @@ class woolydart {
     return _wooly_apply_chat_template(
       llama_model_ptr,
       chat_template,
+      include_assistant,
       chat_messages,
       chat_message_count,
       out_result,
@@ -463,6 +465,7 @@ class woolydart {
           ffi.Int64 Function(
               ffi.Pointer<wooly_llama_model_t>,
               ffi.Pointer<ffi.Char>,
+              ffi.Bool,
               ffi.Pointer<wooly_chat_message>,
               ffi.Int64,
               ffi.Pointer<ffi.Char>,
@@ -472,6 +475,7 @@ class woolydart {
           int Function(
               ffi.Pointer<wooly_llama_model_t>,
               ffi.Pointer<ffi.Char>,
+              bool,
               ffi.Pointer<wooly_chat_message>,
               int,
               ffi.Pointer<ffi.Char>,

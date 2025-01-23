@@ -169,9 +169,12 @@ class LlamaModel {
   }
 
   // Constructs a prompt from a list of chat messages and applies a chat template
-  // .
+  // or uses the default one in the GGUF model if `templateOverride` is left `null`.
+  // Optionally, if `addAssistant` is true, the start of an assistant block is
+  // added to the end of the generated prompt, which is perfect for making a new
+  // response.
   (String, int) makePromptFromMessages(
-      List<ChatMessage> messages, String? templateOverride) {
+      List<ChatMessage> messages, bool addAssistant, String? templateOverride) {
     // handle empty lists
     if (messages.isEmpty) {
       return ("", 0);
@@ -207,6 +210,7 @@ class LlamaModel {
       numProcessed = lib.wooly_apply_chat_template(
           _model,
           templateOverrideNative,
+          addAssistant,
           messageLog,
           messages.length,
           outputText,

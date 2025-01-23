@@ -67,7 +67,8 @@ void main() {
       ChatMessage("user",
           "Return a JSON object that describes an object in a fictional Dark Souls game. The returned JSON object should have 'Title' and 'Description' fields that define the item in the game. Make sure to write the item lore in the style of Fromsoft and thier Dark Souls series of games: there should be over-the-top naming of fantastically gross monsters and tragic historical events from the world, all with a very nihilistic feel.")
     ];
-    final promptResult = llamaModel.makePromptFromMessages(messages, null);
+    final promptResult =
+        llamaModel.makePromptFromMessages(messages, true, null);
     //print(format("DEBUG:\n{}\n\n", promptResult.$1));
     params.setPrompt(promptResult.$1);
 
